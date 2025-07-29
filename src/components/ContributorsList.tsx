@@ -4,10 +4,20 @@ import { Badge } from "@/components/ui/badge";
 
 interface Contributor {
   id: string;
-  address: string;
+  campaignId?: string;
+  address?: string;
   amount: number;
-  timestamp: Date;
+  timestamp: string | Date;
   ensName?: string;
+  transactionHash?: string;
+  blockNumber?: number;
+  userInfo?: {
+    email?: string;
+    name?: {
+      firstName: string;
+      familyName: string;
+    };
+  };
 }
 
 interface ContributorsListProps {
@@ -16,17 +26,20 @@ interface ContributorsListProps {
 }
 
 export function ContributorsList({ contributors, className }: ContributorsListProps) {
-  const formatAddress = (address: string) => {
+  const formatAddress = (address?: string) => {
+    if (!address) return 'Anonymous';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const getAvatarInitials = (address: string) => {
+  const getAvatarInitials = (address?: string) => {
+    if (!address) return 'AN';
     return address.slice(2, 4).toUpperCase();
   };
 
-  const formatTimeAgo = (date: Date) => {
+  const formatTimeAgo = (date: string | Date) => {
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    const contributorDate = typeof date === 'string' ? new Date(date) : date;
+    const diffInMinutes = Math.floor((now.getTime() - contributorDate.getTime()) / (1000 * 60));
     
     if (diffInMinutes < 1) return "just now";
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
@@ -66,7 +79,10 @@ export function ContributorsList({ contributors, className }: ContributorsListPr
                 
                 <div>
                   <div className="font-medium text-foreground">
-                    {contributor.ensName || formatAddress(contributor.address)}
+                    {contributor.userInfo?.name?.firstName
+                      ? `${contributor.userInfo.name.firstName} ${contributor.userInfo.name.familyName || ''}`.trim()
+                      : contributor.ensName || formatAddress(contributor.address)
+                    }
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {formatTimeAgo(contributor.timestamp)}

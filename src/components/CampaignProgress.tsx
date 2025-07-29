@@ -1,14 +1,18 @@
 import { Progress } from "@/components/ui/progress";
 
 interface CampaignProgressProps {
-  raised: number;
-  goal: number;
+  raised?: number;
+  goal?: number;
   className?: string;
 }
 
-export function CampaignProgress({ raised, goal, className }: CampaignProgressProps) {
-  const percentage = Math.min((raised / goal) * 100, 100);
-  const remaining = Math.max(goal - raised, 0);
+export function CampaignProgress({ raised = 0, goal = 1, className }: CampaignProgressProps) {
+  // Safety checks to prevent errors
+  const safeRaised = Number(raised) || 0;
+  const safeGoal = Number(goal) || 1;
+
+  const percentage = Math.min((safeRaised / safeGoal) * 100, 100);
+  const remaining = Math.max(safeGoal - safeRaised, 0);
 
   return (
     <div className={className}>
@@ -38,14 +42,14 @@ export function CampaignProgress({ raised, goal, className }: CampaignProgressPr
       <div className="flex justify-between items-center mt-4">
         <div className="text-center">
           <div className="text-2xl font-bold text-foreground">
-            ${raised.toLocaleString()}
+            ${safeRaised.toLocaleString()}
           </div>
           <div className="text-sm text-muted-foreground">raised</div>
         </div>
-        
+
         <div className="text-center">
           <div className="text-2xl font-bold text-primary">
-            ${goal.toLocaleString()}
+            ${safeGoal.toLocaleString()}
           </div>
           <div className="text-sm text-muted-foreground">goal</div>
         </div>

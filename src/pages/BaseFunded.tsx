@@ -4,18 +4,30 @@ import { CampaignProgress } from "@/components/CampaignProgress";
 import { ContributeButton } from "@/components/ContributeButton";
 import { ContributorsList } from "@/components/ContributorsList";
 import { StatsCards } from "@/components/StatsCards";
-import { toast } from "@/hooks/use-toast";
 
-// Mock data for the campaign
+import { toast } from "@/hooks/use-toast";
+import { BASE_PAY_CONFIG, getBlockExplorerUrl, isDevelopment } from "@/config/basePay";
+import { Link } from "react-router-dom";
+
+interface PaymentResult {
+  success: boolean;
+  id?: string;
+  transactionHash?: string;
+  blockNumber?: number;
+  error?: string;
+  userInfo?: any;
+}
+
+// Campaign data from configuration
 const CAMPAIGN_DATA = {
-  title: "Fund Web3 Dev School in Lagos",
-  description: "Help us send 10 talented young developers from Lagos to an intensive 6-month Web3 bootcamp. This program will equip them with blockchain development skills, smart contract expertise, and connect them to global opportunities in the decentralized future.",
-  goal: 500,
-  raised: 137,
-  location: "Lagos, Nigeria",
+  title: BASE_PAY_CONFIG.CAMPAIGN.TITLE,
+  description: BASE_PAY_CONFIG.CAMPAIGN.DESCRIPTION,
+  goal: BASE_PAY_CONFIG.CAMPAIGN.GOAL,
+  raised: 137, // This will be fetched from blockchain/database in production
+  location: BASE_PAY_CONFIG.CAMPAIGN.LOCATION,
   duration: "30 days remaining",
-  beneficiaries: 10,
-  contributionAmount: 5
+  beneficiaries: BASE_PAY_CONFIG.CAMPAIGN.BENEFICIARIES,
+  contributionAmount: parseInt(BASE_PAY_CONFIG.CONTRIBUTION_AMOUNT)
 };
 
 // Mock contributors data
@@ -61,26 +73,60 @@ const BaseFunded = () => {
   const totalContributors = contributors.length;
   const averageContribution = totalContributors > 0 ? Math.round(raised / totalContributors) : 0;
 
-  const handleContribute = async () => {
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Mock successful contribution
+  const handleContribute = async (paymentResult: PaymentResult) => {
+    if (!paymentResult.success) {
+      console.error("Payment failed:", paymentResult.error);
+      return;
+    }
+
+    console.log("✅ Payment successful:", paymentResult);
+
+    // Create new contributor from payment result
     const newContributor = {
-      id: Date.now().toString(),
-      address: "0x" + Math.random().toString(16).substring(2, 42),
+      id: paymentResult.id || Date.now().toString(),
+      address: paymentResult.userInfo?.onchainAddress || "0x" + Math.random().toString(16).substring(2, 42),
       amount: CAMPAIGN_DATA.contributionAmount,
       timestamp: new Date(),
-      ensName: Math.random() > 0.7 ? "you.base.eth" : undefined
+      ensName: paymentResult.userInfo?.email ?
+        paymentResult.userInfo.email.split('@')[0] + ".base.eth" :
+        (Math.random() > 0.7 ? "you.base.eth" : undefined),
+      transactionHash: paymentResult.transactionHash,
+      blockNumber: paymentResult.blockNumber,
+      userInfo: paymentResult.userInfo
     };
 
+    // Update state
     setContributors(prev => [newContributor, ...prev]);
     setRaised(prev => prev + CAMPAIGN_DATA.contributionAmount);
-    
-    toast({
-      title: "🎉 Contribution Successful!",
-      description: `Thank you for contributing $${CAMPAIGN_DATA.contributionAmount} USDC to this campaign.`,
-      duration: 5000,
+
+    // Show additional success information with block explorer link
+    if (paymentResult.transactionHash) {
+      const explorerUrl = getBlockExplorerUrl(paymentResult.transactionHash);
+      toast({
+        title: "🎉 Contribution Recorded!",
+        description: (
+          <div className="space-y-2">
+            <p>Transaction confirmed on {BASE_PAY_CONFIG.TESTNET ? 'Base Sepolia' : 'Base Chain'}!</p>
+            <p className="text-xs">Hash: {paymentResult.transactionHash.substring(0, 10)}...</p>
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:text-blue-700 underline text-xs"
+            >
+              View on Block Explorer →
+            </a>
+          </div>
+        ),
+        duration: 10000,
+      });
+    }
+
+    // Log for analytics/debugging
+    console.log("📊 Campaign updated:", {
+      newTotal: raised + CAMPAIGN_DATA.contributionAmount,
+      totalContributors: contributors.length + 1,
+      transactionHash: paymentResult.transactionHash
     });
   };
 
@@ -105,6 +151,8 @@ const BaseFunded = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 space-y-8">
+
+
         {/* Campaign Header */}
         <CampaignHeader
           title={CAMPAIGN_DATA.title}
@@ -142,18 +190,16 @@ const BaseFunded = () => {
                   Join {totalContributors} other supporters in funding Web3 education in Lagos
                 </p>
               </div>
-              
+
+
+
               <ContributeButton
                 amount={CAMPAIGN_DATA.contributionAmount}
                 onContribute={handleContribute}
                 className="w-full max-w-md mx-auto"
+                recipientAddress={BASE_PAY_CONFIG.RECIPIENT_ADDRESS}
+                testnet={BASE_PAY_CONFIG.TESTNET}
               />
-              
-              <div className="text-xs text-muted-foreground space-y-1">
-                <p>✓ Secure payment via Base Pay</p>
-                <p>✓ Gasless USDC transactions</p>
-                <p>✓ Transparent on-chain funding</p>
-              </div>
             </div>
           </div>
 
@@ -198,6 +244,35 @@ const BaseFunded = () => {
           <div className="text-center text-sm text-muted-foreground space-y-2">
             <p>Built on Base Chain • Powered by Base Pay • BaseFunded © 2024</p>
             <p>Submission for Base Builder Quest 8</p>
+
+            {/* Development Status Link */}
+            {isDevelopment() && (
+              <div className="mt-2">
+                <Link
+                  to="/dev-status"
+                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  🔧 Development Status
+                </Link>
+              </div>
+            )}
+
+            {BASE_PAY_CONFIG.TESTNET && (
+              <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
+                <p className="text-yellow-800 font-medium">🧪 TESTNET MODE</p>
+                <p className="text-yellow-700 text-xs">
+                  Using Base Sepolia • Get test USDC from{' '}
+                  <a
+                    href="https://faucet.circle.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-yellow-900"
+                  >
+                    Circle Faucet
+                  </a>
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </footer>
