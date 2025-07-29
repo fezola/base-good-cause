@@ -39,12 +39,7 @@ export function ContributeButton({
   };
 
   // Debug log for network
-  console.log('🌐 Network Configuration:', {
-    testnet: testnet,
-    network: testnet ? 'Base Sepolia (Testnet)' : 'Base Mainnet',
-    envVar: import.meta.env.VITE_BASE_PAY_TESTNET,
-    paymentOptions
-  });
+  console.log('🌐 Network:', testnet ? 'Base Sepolia (Testnet)' : 'Base Mainnet');
 
   // Simple Base Pay function - this was working!
   const handleBasePay = async () => {

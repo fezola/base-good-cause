@@ -1,12 +1,10 @@
-// Campaigns Listing Page - Browse all campaigns
+// Campaigns Listing Page - Modern Mobile-First Design
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { ModernHeader } from '@/components/ModernHeader';
+import { CompactCampaignCard } from '@/components/CompactCampaignCard';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Input } from '@/components/ui/input';
-import { Plus, Search, MapPin, Users, Target, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Campaign {
   id: string;
@@ -29,17 +27,18 @@ export function CampaignsListing() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [showLoading, setShowLoading] = useState(true);
 
   const categories = [
     { value: 'all', label: 'All Categories' },
-    { value: 'education', label: '🎓 Education' },
-    { value: 'health', label: '🏥 Health & Medical' },
-    { value: 'community', label: '🏘️ Community' },
-    { value: 'environment', label: '🌱 Environment' },
-    { value: 'technology', label: '💻 Technology' },
-    { value: 'arts', label: '🎨 Arts & Culture' },
-    { value: 'emergency', label: '🚨 Emergency' },
-    { value: 'other', label: '📋 Other' }
+    { value: 'education', label: 'Education' },
+    { value: 'health', label: 'Health & Medical' },
+    { value: 'community', label: 'Community' },
+    { value: 'environment', label: 'Environment' },
+    { value: 'technology', label: 'Technology' },
+    { value: 'arts', label: 'Arts & Culture' },
+    { value: 'emergency', label: 'Emergency' },
+    { value: 'other', label: 'Other' }
   ];
 
   useEffect(() => {
@@ -61,15 +60,19 @@ export function CampaignsListing() {
     }
   };
 
+  const handleSearch = (query: string) => {
+    setSearchTerm(query);
+  };
+
   const filterCampaigns = () => {
     let filtered = campaigns;
 
     // Filter by search term
     if (searchTerm.trim()) {
       filtered = filtered.filter(campaign =>
-        campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        campaign.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        campaign.location.toLowerCase().includes(searchTerm.toLowerCase())
+          campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          campaign.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          campaign.location.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -103,156 +106,77 @@ export function CampaignsListing() {
     return categoryMap[category] || '📋';
   };
 
+  if (showLoading) {
+    return <LoadingScreen onComplete={() => setShowLoading(false)} />;
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading campaigns...</p>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+            <p className="text-gray-600 text-sm">Loading campaigns...</p>
+          </div>
         </div>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Browse Campaigns</h1>
-              <p className="text-gray-600 mt-1">Discover and support amazing causes</p>
-            </div>
-            
-            <Link to="/create">
-              <Button size="lg" className="flex items-center space-x-2">
-                <Plus className="h-5 w-5" />
-                <span>Create Campaign</span>
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <div className="min-h-screen bg-gray-50">
+        {/* Modern Header */}
+        <ModernHeader onSearch={handleSearch} />
 
-      {/* Filters */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-            {/* Search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search campaigns..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            {/* Category Filter */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-input bg-background rounded-md text-sm min-w-[200px]"
-            >
+        {/* Category Filter */}
+        <div className="bg-white border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex space-x-2 overflow-x-auto pb-2">
               {categories.map(cat => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
+                  <button
+                      key={cat.value}
+                      onClick={() => setSelectedCategory(cat.value)}
+                      className={`
+                  px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors
+                  ${selectedCategory === cat.value
+                          ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }
+                `}
+                  >
+                    {cat.label}
+                  </button>
               ))}
-            </select>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {filteredCampaigns.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔍</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Campaigns Found</h2>
-            <p className="text-gray-600 mb-6">
-              {campaigns.length === 0 
-                ? "No campaigns have been created yet. Be the first to start a campaign!"
-                : "Try adjusting your search or filter criteria."
-              }
-            </p>
-            <Link to="/create">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create First Campaign
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCampaigns.map((campaign) => {
-              const progressPercentage = Math.min((campaign.raised / campaign.goal) * 100, 100);
-              
-              return (
-                <Card key={campaign.id} className="hover:shadow-lg transition-shadow duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <Badge variant="secondary" className="mb-2">
-                        {getCategoryEmoji(campaign.category)} {campaign.category}
-                      </Badge>
-                      <div className="text-xs text-muted-foreground flex items-center">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {formatDate(campaign.createdAt)}
-                      </div>
-                    </div>
-                    
-                    <CardTitle className="text-lg line-clamp-2">
-                      {campaign.title}
-                    </CardTitle>
-                    
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {campaign.description}
-                    </p>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4">
-                    {/* Progress */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium">${campaign.raised} raised</span>
-                        <span className="text-muted-foreground">of ${campaign.goal}</span>
-                      </div>
-                      <Progress value={progressPercentage} className="h-2" />
-                      <div className="text-xs text-muted-foreground">
-                        {progressPercentage.toFixed(1)}% funded
-                      </div>
-                    </div>
-                    
-                    {/* Stats */}
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center">
-                        <Users className="h-4 w-4 mr-1" />
-                        {campaign.contributors} supporters
-                      </div>
-                      {campaign.location && (
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {campaign.location}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Action Button */}
-                    <Link to={`/campaign/${campaign.id}`} className="block">
-                      <Button className="w-full" variant="outline">
-                        <Target className="h-4 w-4 mr-2" />
-                        View Campaign
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </main>
-    </div>
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto px-4 py-6">
+          {filteredCampaigns.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="text-4xl mb-4">🚀</div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  {campaigns.length === 0 ? "Start Something Amazing" : "No Results Found"}
+                </h2>
+                <p className="text-gray-600 mb-6 text-sm">
+                  {campaigns.length === 0
+                      ? "Be the first to create a campaign and make a difference"
+                      : "Try adjusting your search or browse different categories"
+                  }
+                </p>
+                <Link to="/create">
+                  <Button className="bg-gradient-to-r from-blue-600 to-blue-700">
+                    Create Campaign
+                  </Button>
+                </Link>
+              </div>
+          ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredCampaigns.map((campaign) => (
+                    <CompactCampaignCard key={campaign.id} campaign={campaign} />
+                ))}
+              </div>
+          )}
+        </main>
+      </div>
   );
 }

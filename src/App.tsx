@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { logProductionStatus } from "@/utils/productionChecks";
+import "@/styles/global-dark.css";
 import BaseFunded from "./pages/BaseFunded";
 import { CreateCampaign } from "./pages/CreateCampaign";
 import { CampaignPage } from "./pages/CampaignPage";

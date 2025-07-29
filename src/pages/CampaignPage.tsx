@@ -49,10 +49,10 @@ export function CampaignPage() {
     try {
       const campaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
       const foundCampaign = campaigns.find((c: Campaign) => c.id === campaignId);
-      
+
       if (foundCampaign) {
         setCampaign(foundCampaign);
-        
+
         // Load contributors for this campaign
         const allContributors = JSON.parse(localStorage.getItem('basefunded_contributors') || '[]');
         const campaignContributors = allContributors.filter((c: any) => c.campaignId === campaignId);
@@ -95,8 +95,8 @@ export function CampaignPage() {
 
       // Update campaigns list
       const campaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
-      const updatedCampaigns = campaigns.map((c: Campaign) => 
-        c.id === campaign.id ? updatedCampaign : c
+      const updatedCampaigns = campaigns.map((c: Campaign) =>
+          c.id === campaign.id ? updatedCampaign : c
       );
       localStorage.setItem('basefunded_campaigns', JSON.stringify(updatedCampaigns));
 
@@ -123,7 +123,7 @@ export function CampaignPage() {
 
   const handleShare = async () => {
     const url = window.location.href;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -159,112 +159,115 @@ export function CampaignPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading campaign...</p>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading campaign...</p>
+          </div>
         </div>
-      </div>
     );
   }
 
   if (!campaign) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Campaign Not Found</h1>
-          <p className="text-gray-600 mb-6">The campaign you're looking for doesn't exist.</p>
-          <Link to="/">
-            <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Campaign Not Found</h1>
+            <p className="text-gray-600 mb-6">The campaign you're looking for doesn't exist.</p>
+            <Link to="/">
+              <Button>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
     );
   }
 
   const progressPercentage = Math.min((campaign.raised / campaign.goal) * 100, 100);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
-              <ArrowLeft className="h-5 w-5" />
-              <span className="font-medium">Back to Home</span>
-            </Link>
-            
-            <div className="flex items-center space-x-3">
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+                <ArrowLeft className="h-5 w-5" />
+                <span className="text-sm font-medium">Back</span>
+              </Link>
+
               <Button
-                onClick={handleShare}
-                variant="outline"
-                size="sm"
-                className="flex items-center space-x-2"
+                  onClick={handleShare}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center space-x-1"
               >
                 <Share2 className="h-4 w-4" />
-                <span>Share</span>
+                <span className="hidden sm:inline">Share</span>
               </Button>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 space-y-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Campaign Header */}
-          <CampaignHeader
-            title={campaign.title}
-            description={campaign.description}
-            location={campaign.location}
-            duration="Ongoing"
-            beneficiaries={campaign.beneficiaries}
-          />
-
-          {/* Stats Cards */}
-          <StatsCards
-            totalRaised={campaign.raised}
-            totalContributors={campaign.contributors}
-            averageContribution={campaign.contributors > 0 ? campaign.raised / campaign.contributors : 0}
-            goal={campaign.goal}
-          />
-
-          {/* Progress */}
-          <CampaignProgress
-            raised={campaign.raised}
-            goal={campaign.goal}
-          />
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Contribution Section */}
-            <div className="bg-card rounded-lg p-8 shadow-elevation text-center space-y-6">
-              <div>
-                <h3 className="text-2xl font-bold text-foreground mb-2">
-                  Ready to Make a Difference?
-                </h3>
-                <p className="text-muted-foreground">
-                  Join {campaign.contributors} other supporters in funding this campaign
-                </p>
+        {/* Main Content */}
+        <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+          <div>
+            {/* Campaign Info Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="mb-4">
+                <h1 className="text-xl font-bold text-gray-900 mb-2">{campaign.title}</h1>
+                <p className="text-gray-600 text-sm leading-relaxed">{campaign.description}</p>
               </div>
-              
-              <ContributeButton
-                amount={1}
-                onContribute={handleContribute}
-                className="w-full max-w-md mx-auto"
-                recipientAddress={campaign.recipientAddress}
-                testnet={BASE_PAY_CONFIG.TESTNET}
+
+              {/* Progress */}
+              <CampaignProgress
+                  raised={campaign.raised}
+                  goal={campaign.goal}
               />
             </div>
 
-            {/* Contributors List */}
-            <ContributorsList contributors={contributors} />
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white rounded-lg p-4 text-center border border-gray-100">
+                <div className="text-lg font-bold text-gray-900">${campaign.raised}</div>
+                <div className="text-xs text-gray-500">Raised</div>
+              </div>
+              <div className="bg-white rounded-lg p-4 text-center border border-gray-100">
+                <div className="text-lg font-bold text-gray-900">{campaign.contributors}</div>
+                <div className="text-xs text-gray-500">Supporters</div>
+              </div>
+              <div className="bg-white rounded-lg p-4 text-center border border-gray-100">
+                <div className="text-lg font-bold text-gray-900">{progressPercentage.toFixed(0)}%</div>
+                <div className="text-xs text-gray-500">Funded</div>
+              </div>
+            </div>
+
+            {/* Contribution Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                Support This Campaign
+              </h3>
+              <p className="text-gray-600 text-sm mb-6">
+                Join {campaign.contributors} supporters making a difference
+              </p>
+
+              <ContributeButton
+                  amount={0.1}
+                  onContribute={handleContribute}
+                  className="w-full"
+                  recipientAddress={campaign.recipientAddress}
+                  testnet={BASE_PAY_CONFIG.TESTNET}
+              />
+            </div>
+
+            {/* Contributors */}
+            {contributors.length > 0 && (
+                <ContributorsList contributors={contributors} />
+            )}
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
   );
 }
