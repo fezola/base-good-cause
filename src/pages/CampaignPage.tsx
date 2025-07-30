@@ -14,6 +14,8 @@ import { Campaign } from '@/lib/supabase';
 import { WithdrawButton } from '@/components/WithdrawButton';
 import { RefundButton } from '@/components/RefundButton';
 import { CampaignAnalytics } from '@/components/CampaignAnalytics';
+import { CampaignUpdates } from '@/components/CampaignUpdates';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { vaultService } from '@/services/vaultService';
 import {
@@ -381,6 +383,13 @@ export function CampaignPage() {
                   <ContributorsList contributors={contributors} />
                 </div>
               )}
+
+              {/* Campaign Updates */}
+              <CampaignUpdates
+                campaignId={campaign.id}
+                isCreator={user?.id === campaign.user_id}
+                className="mt-8"
+              />
             </div>
 
             {/* Right Column - Donation Panel */}
@@ -464,21 +473,7 @@ export function CampaignPage() {
                   />
                 )}
 
-                {/* Share Card */}
-                <div className="card-elevated bg-white p-6">
-                  <h3 className="font-bold text-foreground mb-4">Share this campaign</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Help spread the word and reach more supporters
-                  </p>
-                  <Button
-                    onClick={handleShare}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share Campaign
-                  </Button>
-                </div>
+
               </div>
             </div>
           </div>

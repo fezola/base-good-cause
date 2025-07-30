@@ -28,6 +28,17 @@ export class CampaignService {
     return data || []
   }
 
+  // Get all campaigns (including inactive) for discovery
+  async getAllCampaigns() {
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
+  }
+
   // Get campaign by ID
   async getCampaign(id: string) {
     const { data, error } = await supabase

@@ -15,6 +15,7 @@ import { CampaignsListing } from "./pages/CampaignsListing";
 import { MyCampaigns } from "./pages/MyCampaigns";
 import { AuthPage } from "./pages/AuthPage";
 import { TestVault } from "./pages/TestVault";
+import { DiscoverPage } from "./pages/DiscoverPage";
 import DevStatus from "./pages/DevStatus";
 import NotFound from "./pages/NotFound";
 
@@ -49,6 +50,7 @@ const App = () => {
               </ProtectedRoute>
             } />
             <Route path="/campaign/:campaignId" element={<CampaignPage />} />
+            <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/demo" element={<BaseFunded />} />
             <Route path="/test-vault" element={
               <ProtectedRoute>

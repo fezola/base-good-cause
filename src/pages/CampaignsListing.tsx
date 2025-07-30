@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ModernHeader } from '@/components/ModernHeader';
 import { CompactCampaignCard } from '@/components/CompactCampaignCard';
+import { TrendingCampaigns } from '@/components/TrendingCampaigns';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'react-router-dom';
@@ -215,6 +216,26 @@ export function CampaignsListing() {
                 <h3 className="font-semibold text-lg mb-2">Transparent Impact</h3>
                 <p className="text-muted-foreground">Track exactly how your contributions are used</p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Campaigns Section */}
+        <section className="py-12 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">Featured Campaigns</h2>
+              <Link to="/discover">
+                <Button variant="outline" className="flex items-center space-x-2">
+                  <span>Discover More</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredCampaigns.slice(0, 4).map((campaign) => (
+                <CompactCampaignCard key={campaign.id} campaign={campaign} />
+              ))}
             </div>
           </div>
         </section>
