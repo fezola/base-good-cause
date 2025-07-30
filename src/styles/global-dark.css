@@ -27,6 +27,32 @@ div, main, section, article, header, footer, nav {
   border-color: #333333 !important;
 }
 
+/* Fix popups, modals, and dialogs */
+[role="dialog"],
+[role="alertdialog"],
+.modal,
+.popup,
+.toast,
+.dropdown,
+[data-radix-popper-content-wrapper],
+[data-radix-portal],
+[data-state="open"] {
+  background: #1a1a1a !important;
+  background-color: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+  color: #ffffff !important;
+}
+
+/* Fix toast notifications */
+.toaster,
+.toast,
+[class*="toast"] {
+  background: #1a1a1a !important;
+  background-color: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+  color: #ffffff !important;
+}
+
 /* Force dark text */
 .text-gray-900,
 .text-gray-800,
@@ -236,6 +262,34 @@ span, div, p, a, label {
   div, main, section, article {
     background: transparent !important;
     background-color: transparent !important;
+  }
+
+  /* Fix mobile popups and modals */
+  [role="dialog"],
+  [role="alertdialog"],
+  .modal,
+  .popup,
+  .toast,
+  .dropdown,
+  [data-radix-popper-content-wrapper],
+  [data-radix-portal],
+  [data-state="open"] {
+    background: #1a1a1a !important;
+    background-color: #1a1a1a !important;
+    border: 2px solid #333333 !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  /* Fix mobile toast notifications */
+  .toaster,
+  .toast,
+  [class*="toast"] {
+    background: #1a1a1a !important;
+    background-color: #1a1a1a !important;
+    border: 2px solid #333333 !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
   }
 
   /* Fix mobile browser chrome */
