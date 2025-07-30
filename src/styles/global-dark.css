@@ -66,11 +66,23 @@ textarea::placeholder {
   color: #666666 !important;
 }
 
-/* Force dark buttons */
-button {
+/* Force dark buttons - but NOT outline buttons */
+button:not([data-variant="outline"]):not(.outline-button) {
   background: #0000FF !important;
   color: #ffffff !important;
   border: none !important;
+}
+
+/* Specifically override outline buttons with higher specificity */
+div button[data-variant="outline"],
+div .outline-button,
+div button.outline-button,
+.w-full.outline-button {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 2px solid #666666 !important;
+  color: #ffffff !important;
 }
 
 /* Override for Base Pay button - force blue color */
@@ -79,6 +91,24 @@ button[style*="backgroundColor: #0000FF"],
 .base-pay-button {
   background: #0000FF !important;
   background-image: none !important;
+}
+
+/* Override for Sign Up button - make it white/outline */
+button[data-state="active"][role="tab"]:last-child,
+form[data-signup] button[type="submit"],
+.sign-up-button {
+  background: transparent !important;
+  border: 2px solid #333333 !important;
+  color: #ffffff !important;
+}
+
+/* Keep Sign In buttons blue */
+button[data-state="active"][role="tab"]:first-child,
+form[data-signin] button[type="submit"],
+.sign-in-button {
+  background: #0000FF !important;
+  background-image: none !important;
+  color: white !important;
 }
 
 /* Force dark cards */

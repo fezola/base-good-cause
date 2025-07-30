@@ -7,6 +7,7 @@ interface LoadingScreenProps {
 
 export function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const [isComplete, setIsComplete] = useState(false);
+  const [showText, setShowText] = useState(false);
   const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, delay: number}>>([]);
 
   useEffect(() => {
@@ -19,12 +20,21 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     }));
     setParticles(newParticles);
 
+    // Show text after 1 second
+    const textTimer = setTimeout(() => {
+      setShowText(true);
+    }, 1000);
+
+    // Complete loading after 8 seconds
     const timer = setTimeout(() => {
       setIsComplete(true);
-      setTimeout(onComplete, 800); // Longer transition for dramatic effect
-    }, 2500); // 2.5 seconds loading
+      setTimeout(onComplete, 2000); // Even longer transition
+    }, 8000); // 8 seconds loading - much longer to read the text
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(textTimer);
+    };
   }, [onComplete]);
 
   return (
@@ -43,33 +53,42 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
       ))}
 
       <div className="text-center relative z-10">
-        {/* Rotating Rectangle with Glow */}
+        {/* BasePay Logo with Glow */}
         <div className="mb-12 flex justify-center">
           <div className="relative">
             {/* Glow Effect */}
             <div
               className={`
-                absolute inset-0 w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600
+                absolute inset-0 w-20 h-20 bg-blue-500
                 rounded-xl blur-xl opacity-60 transition-all duration-1000 ease-out
                 ${isComplete ? 'scale-100 opacity-40' : 'scale-150 opacity-80'}
               `}
             />
-            {/* Main Rectangle */}
+            {/* BasePay Logo */}
             <div
               className={`
-                relative w-20 h-20 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
-                rounded-xl shadow-2xl transition-all duration-1000 ease-out
-                ${isComplete ? 'rotate-0 scale-100' : 'rotate-45 scale-110'}
+                relative w-20 h-20 rounded-xl shadow-2xl transition-all duration-1000 ease-out
+                ${isComplete ? 'rotate-0 scale-100' : 'rotate-12 scale-110'}
+                flex items-center justify-center
               `}
               style={{
-                animation: isComplete ? 'none' : 'spin 1.5s ease-in-out infinite alternate, pulse 2s ease-in-out infinite'
+                animation: isComplete ? 'none' : 'pulse 2s ease-in-out infinite'
               }}
-            />
+            >
+              <img
+                src="/basepay.JPG"
+                alt="BasePay Logo"
+                className="w-16 h-16 rounded-lg"
+                style={{
+                  filter: 'drop-shadow(0 0 20px rgba(0, 0, 255, 0.5))'
+                }}
+              />
+            </div>
           </div>
         </div>
 
         {/* Brand Text with Glow */}
-        <div className={`transition-all duration-800 ${isComplete ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        <div className={`transition-all duration-1000 ${showText ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <h1 className="text-4xl font-bold mb-3">
             <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
               BasePay

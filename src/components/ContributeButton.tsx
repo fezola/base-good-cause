@@ -173,29 +173,18 @@ export function ContributeButton({
               Processing Payment...
             </>
           ) : (
-            <>
-              <div
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+              <img
+                src="/basepay.JPG"
+                alt="BasePay Logo"
                 style={{
                   width: '20px',
                   height: '20px',
-                  backgroundColor: 'white',
-                  marginRight: '8px',
-                  display: 'inline-block',
-                  verticalAlign: 'middle',
-                  border: '1px solid white'
+                  marginRight: '8px'
                 }}
-              >
-                <div
-                  style={{
-                    width: '8px',
-                    height: '8px',
-                    backgroundColor: '#0000FF',
-                    margin: '6px'
-                  }}
-                />
-              </div>
+              />
               <span style={{ color: 'black' }}>Base</span><span style={{ color: 'white' }}>Pay</span>
-            </>
+            </div>
           )}
         </button>
 

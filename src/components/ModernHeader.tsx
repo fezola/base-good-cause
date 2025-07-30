@@ -116,7 +116,7 @@ export function ModernHeader({ onSearch, showSearch = true }: ModernHeaderProps)
             ) : (
               <>
                 <Link to="/auth">
-                  <Button variant="ghost" size="sm">
+                  <Button size="sm" style={{ backgroundColor: '#0000FF', color: 'white' }}>
                     Sign In
                   </Button>
                 </Link>
