@@ -5,7 +5,7 @@ export const BASE_PAY_CONFIG = {
   // Network Configuration
   TESTNET: import.meta.env.VITE_BASE_PAY_TESTNET === 'true',
   ENVIRONMENT: import.meta.env.VITE_ENVIRONMENT || 'development',
-  
+
   // Platform Configuration
   PLATFORM_NAME: import.meta.env.VITE_PLATFORM_NAME || 'FundMe',
   PLATFORM_DESCRIPTION: import.meta.env.VITE_PLATFORM_DESCRIPTION || 'Decentralized Crowdfunding Platform',
@@ -13,7 +13,7 @@ export const BASE_PAY_CONFIG = {
   // Contribution Configuration
   PRESET_AMOUNTS: [5, 10, 25, 50, 100], // Default preset amounts for flexible contributions
   DEFAULT_SELECTED_AMOUNT: 10, // Default selected amount
-  
+
   // Campaign Details
   CAMPAIGN: {
     TITLE: import.meta.env.VITE_CAMPAIGN_TITLE || 'Fund Web3 Dev School in Lagos',
@@ -26,7 +26,6 @@ export const BASE_PAY_CONFIG = {
   // Payment Configuration
   CONTRIBUTION_AMOUNT: import.meta.env.VITE_CONTRIBUTION_AMOUNT || '5',
   RECIPIENT_ADDRESS: import.meta.env.VITE_RECIPIENT_ADDRESS || '0x742d35Cc6634C0532925a3b8D4C9db96C4b5Da5e',
-  TESTNET: import.meta.env.VITE_TESTNET === 'true',
 
   // Base Chain Configuration
   CHAIN: {

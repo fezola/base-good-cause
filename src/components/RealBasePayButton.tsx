@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface RealBasePayButtonProps {
   amount: string;
@@ -8,169 +8,70 @@ interface RealBasePayButtonProps {
 }
 
 export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError }: RealBasePayButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [BasePayButton, setBasePayButton] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handlePayment = async () => {
-    setIsLoading(true);
-
-    try {
-      // Method 1: Try to use existing Base Account SDK
+  useEffect(() => {
+    const loadBasePay = async () => {
       try {
-        const { createBaseAccountSDK } = await import('@base-org/account');
-
-        const sdk = createBaseAccountSDK({
-          appName: 'BaseFunded',
-          appLogo: '/basepay.JPG',
-          enableAnalytics: false,
-        });
-
-        const provider = sdk.getProvider();
-
-        const accounts = await provider.request({
-          method: 'eth_requestAccounts'
-        });
-
-        const { pay } = await import('@base-org/account');
-
-        const result = await pay({
-          amount: amount,
-          to: recipientAddress,
-          token: 'USDC',
-          testnet: false
-        });
-
-        onSuccess?.({
-          success: true,
-          id: result.id || `base_${Date.now()}`,
-          transactionHash: result.transactionHash,
-          amount: parseFloat(amount)
-        });
-
-        return;
-
-      } catch (baseSDKError) {
-        // Continue to fallback method
+        // Import ONLY the BasePayButton component - no SDK
+        const { BasePayButton: BasePayComponent } = await import('@base-org/account-ui/react');
+        setBasePayButton(() => BasePayComponent);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load BasePay:', err);
+        setError('BasePay not available');
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      // Method 2: Try direct wallet connection
-      try {
-        if (!window.ethereum) {
-          throw new Error('No wallet detected. Please install MetaMask or Coinbase Wallet.');
-        }
+    loadBasePay();
+  }, []);
 
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts'
-        });
-
-        if (accounts.length === 0) {
-          throw new Error('No accounts found. Please connect your wallet.');
-        }
-
-        // Switch to Base mainnet
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x2105' }], // Base mainnet
-          });
-        } catch (switchError) {
-          // If Base network is not added, add it
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: '0x2105',
-              chainName: 'Base',
-              nativeCurrency: {
-                name: 'Ethereum',
-                symbol: 'ETH',
-                decimals: 18,
-              },
-              rpcUrls: ['https://mainnet.base.org'],
-              blockExplorerUrls: ['https://basescan.org'],
-            }],
-          });
-        }
-
-        // REAL USDC transfer on Base mainnet
-        const usdcContract = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // USDC on Base mainnet
-        const amountInWei = Math.floor(parseFloat(amount) * 1000000); // USDC has 6 decimals
-
-        // Proper ERC20 transfer function signature
-        const recipientPadded = recipientAddress.slice(2).padStart(64, '0');
-        const amountPadded = amountInWei.toString(16).padStart(64, '0');
-        const transferData = `0xa9059cbb${recipientPadded}${amountPadded}`;
-
-        const txHash = await window.ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [{
-            from: accounts[0],
-            to: usdcContract,
-            data: transferData,
-            value: '0x0',
-            gas: '0x15F90', // 90000 gas limit for ERC20 transfer
-          }],
-        });
-
-        // Wait for transaction confirmation before calling success
-        if (txHash) {
-          // Only call success if we have a real transaction hash
-          onSuccess?.({
-            success: true,
-            id: txHash,
-            transactionHash: txHash,
-            amount: parseFloat(amount)
-          });
-        } else {
-          throw new Error('Transaction failed - no transaction hash received');
-        }
-
-        return;
-
-      } catch (walletError) {
-        throw walletError;
-      }
-
-    } catch (error) {
-      // Only call onError for real errors, don't simulate success
-      if (error.code === 4001) {
-        // User rejected transaction
-        onError?.(new Error('Transaction rejected by user'));
-      } else if (error.code === -32603) {
-        // Internal error (insufficient funds, etc.)
-        onError?.(new Error('Transaction failed: ' + (error.message || 'Insufficient funds or network error')));
-      } else {
-        onError?.(new Error('Payment failed: ' + (error.message || 'Unknown error')));
-      }
-    } finally {
-      setIsLoading(false);
+  const handlePaymentResult = (result: any) => {
+    if (result.success) {
+      onSuccess?.(result);
+    } else {
+      onError?.(new Error(result.error || 'Payment failed'));
     }
   };
 
-  return (
-    <div className="space-y-3">
-      {/* Main Base Pay Button */}
+  if (isLoading) {
+    return (
       <button
-        onClick={handlePayment}
-        disabled={isLoading}
-        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:bg-gray-400 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center space-x-3 shadow-lg"
+        disabled
+        className="w-full bg-gray-400 text-white py-4 px-6 rounded-lg"
       >
-        {isLoading ? (
-          <>
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            <span>Processing Payment...</span>
-          </>
-        ) : (
-          <>
-            <img
-              src="/basepay.JPG"
-              alt="BasePay"
-              className="h-6 w-6 object-contain"
-            />
-            <span>BasePay</span>
-          </>
-        )}
+        ⏳ Loading BasePay...
       </button>
+    );
+  }
 
+  if (error || !BasePayButton) {
+    return (
+      <button
+        disabled
+        className="w-full bg-red-400 text-white py-4 px-6 rounded-lg"
+      >
+        ❌ BasePay Not Available
+      </button>
+    );
+  }
 
+  return (
+    <div className="space-y-2">
+      {/* REAL BasePay Button - handles everything internally */}
+      <BasePayButton
+        paymentOptions={{
+          amount: amount,
+          to: recipientAddress,
+          token: 'USDC',
+          testnet: false, // Use mainnet
+        }}
+        onPaymentResult={handlePaymentResult}
+      />
     </div>
   );
 }

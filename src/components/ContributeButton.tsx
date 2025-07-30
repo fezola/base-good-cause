@@ -1,6 +1,6 @@
 // ContributeButton - Official Base Pay Integration
 import { useState } from 'react';
-import { RealBasePayButton } from '@/components/RealBasePayButton';
+import { SimpleBasePay } from '@/components/SimpleBasePay';
 import { verifyUSDCTransaction, isValidTransactionHash } from '@/utils/transactionVerifier';
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -138,10 +138,11 @@ export function ContributeButton({
           )}
         </div>
 
-        {/* Real Base Pay Button */}
-        <RealBasePayButton
+        {/* Simple Base Pay Button */}
+        <SimpleBasePay
           amount={getCurrentAmount().toFixed(2)}
           recipientAddress={recipientAddress}
+          testnet={testnet}
           onSuccess={async (result) => {
             // Validate transaction hash format
             if (!isValidTransactionHash(result.transactionHash)) {
@@ -234,6 +235,21 @@ export function ContributeButton({
           <p className="text-sm text-center font-medium mt-4">
             {status}
           </p>
+        )}
+
+        {/* Debug Info (Development Only) */}
+        {import.meta.env.DEV && (
+          <div className="text-xs bg-blue-50 p-2 rounded border">
+            <strong>Debug Info:</strong><br/>
+            Network: {testnet ? 'Base Sepolia (Testnet)' : 'Base Mainnet'}<br/>
+            Recipient: {recipientAddress}<br/>
+            Amount: ${getCurrentAmount().toFixed(2)} USDC<br/>
+            {testnet && (
+              <span className="text-blue-600">
+                Get test USDC: <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer" className="underline">Circle Faucet</a>
+              </span>
+            )}
+          </div>
         )}
 
         {/* Security Note */}
