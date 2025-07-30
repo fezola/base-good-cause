@@ -1,6 +1,7 @@
 // ContributeButton - Official Base Pay Integration
 import { useState } from 'react';
 import { RealBasePayButton } from '@/components/RealBasePayButton';
+import { verifyUSDCTransaction, isValidTransactionHash } from '@/utils/transactionVerifier';
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -142,25 +143,71 @@ export function ContributeButton({
           amount={getCurrentAmount().toFixed(2)}
           recipientAddress={recipientAddress}
           onSuccess={async (result) => {
-            console.log('✅ Payment Success:', result);
-            setStatus('🎉 Payment successful!');
+            // Validate transaction hash format
+            if (!isValidTransactionHash(result.transactionHash)) {
+              console.error('❌ Invalid transaction hash:', result.transactionHash);
+              setStatus('❌ Invalid transaction - contribution not recorded');
+              toast({
+                title: "❌ Invalid Transaction",
+                description: "No valid transaction hash received. Contribution not recorded.",
+                variant: "destructive",
+                duration: 5000,
+              });
+              return;
+            }
 
-            toast({
-              title: "🎉 Payment Successful!",
-              description: `Thank you for contributing $${getCurrentAmount()} USDC!`,
-              duration: 5000,
-            });
+            setStatus('🔍 Verifying transaction on blockchain...');
 
-            const paymentResult: PaymentResult = {
-              success: true,
-              id: result.id,
-              transactionHash: result.transactionHash,
-              blockNumber: result.blockNumber,
-              amount: getCurrentAmount(),
-              userInfo: result.userInfo
-            };
+            try {
+              // Verify the transaction on Base blockchain
+              const verification = await verifyUSDCTransaction(
+                result.transactionHash,
+                recipientAddress,
+                getCurrentAmount()
+              );
 
-            await onContribute(paymentResult);
+              if (!verification.isValid) {
+                console.error('❌ Transaction verification failed:', verification.error);
+                setStatus('❌ Transaction verification failed');
+                toast({
+                  title: "❌ Transaction Verification Failed",
+                  description: verification.error || "Transaction could not be verified on blockchain",
+                  variant: "destructive",
+                  duration: 7000,
+                });
+                return;
+              }
+
+              console.log('✅ Transaction verified on blockchain:', verification);
+              setStatus('🎉 Payment verified and successful!');
+
+              toast({
+                title: "🎉 Payment Verified!",
+                description: `Verified $${verification.amount} USDC payment on Base blockchain! TX: ${result.transactionHash.substring(0, 10)}...`,
+                duration: 5000,
+              });
+
+              const paymentResult: PaymentResult = {
+                success: true,
+                id: result.id,
+                transactionHash: result.transactionHash,
+                blockNumber: verification.blockNumber,
+                amount: verification.amount, // Use verified amount
+                userInfo: result.userInfo
+              };
+
+              await onContribute(paymentResult);
+
+            } catch (verificationError) {
+              console.error('❌ Verification error:', verificationError);
+              setStatus('❌ Could not verify transaction');
+              toast({
+                title: "❌ Verification Error",
+                description: "Could not verify transaction on blockchain. Contribution not recorded.",
+                variant: "destructive",
+                duration: 7000,
+              });
+            }
           }}
           onError={async (error) => {
             console.error('❌ Payment Failed:', error);

@@ -92,11 +92,14 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
 
         // Create transaction for USDC transfer
         const usdcContract = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // USDC on Base
-        const amountInWei = (parseFloat(amount) * 1000000).toString(); // USDC has 6 decimals
+        const amountInWei = Math.floor(parseFloat(amount) * 1000000); // USDC has 6 decimals
 
-        // ERC20 transfer function signature
-        const transferData = `0xa9059cbb${recipientAddress.slice(2).padStart(64, '0')}${parseInt(amountInWei).toString(16).padStart(64, '0')}`;
+        // Proper ERC20 transfer function signature
+        const recipientPadded = recipientAddress.slice(2).padStart(64, '0');
+        const amountPadded = amountInWei.toString(16).padStart(64, '0');
+        const transferData = `0xa9059cbb${recipientPadded}${amountPadded}`;
 
+        // Send the actual USDC transaction
         const txHash = await window.ethereum.request({
           method: 'eth_sendTransaction',
           params: [{
@@ -104,15 +107,22 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
             to: usdcContract,
             data: transferData,
             value: '0x0',
+            gas: '0x15F90', // 90000 gas limit for ERC20 transfer
           }],
         });
 
-        onSuccess?.({
-          success: true,
-          id: txHash,
-          transactionHash: txHash,
-          amount: parseFloat(amount)
-        });
+        // Wait for transaction confirmation before calling success
+        if (txHash) {
+          // Only call success if we have a real transaction hash
+          onSuccess?.({
+            success: true,
+            id: txHash,
+            transactionHash: txHash,
+            amount: parseFloat(amount)
+          });
+        } else {
+          throw new Error('Transaction failed - no transaction hash received');
+        }
 
         return;
 
@@ -121,7 +131,16 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
       }
 
     } catch (error) {
-      onError?.(error);
+      // Only call onError for real errors, don't simulate success
+      if (error.code === 4001) {
+        // User rejected transaction
+        onError?.(new Error('Transaction rejected by user'));
+      } else if (error.code === -32603) {
+        // Internal error (insufficient funds, etc.)
+        onError?.(new Error('Transaction failed: ' + (error.message || 'Insufficient funds or network error')));
+      } else {
+        onError?.(new Error('Payment failed: ' + (error.message || 'Unknown error')));
+      }
     } finally {
       setIsLoading(false);
     }

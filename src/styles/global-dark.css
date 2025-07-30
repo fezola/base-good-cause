@@ -68,7 +68,7 @@ textarea::placeholder {
 
 /* Force dark buttons - but NOT outline buttons */
 button:not([data-variant="outline"]):not(.outline-button) {
-  background: #0000FF !important;
+  background: #333333 !important;
   color: #ffffff !important;
   border: none !important;
 }
@@ -85,12 +85,11 @@ div button.outline-button,
   color: #ffffff !important;
 }
 
-/* Override for Base Pay button - force blue color */
-button[style*="backgroundColor: rgb(0, 0, 255)"],
-button[style*="backgroundColor: #0000FF"],
+/* Override for Base Pay button - keep gradient */
+button[class*="gradient"],
 .base-pay-button {
-  background: #0000FF !important;
-  background-image: none !important;
+  background: linear-gradient(to right, #2563eb, #7c3aed) !important;
+  background-image: linear-gradient(to right, #2563eb, #7c3aed) !important;
 }
 
 /* Override for Sign Up button - make it white/outline */
@@ -102,12 +101,12 @@ form[data-signup] button[type="submit"],
   color: #ffffff !important;
 }
 
-/* Keep Sign In buttons blue */
+/* Keep Sign In buttons with gradient */
 button[data-state="active"][role="tab"]:first-child,
 form[data-signin] button[type="submit"],
 .sign-in-button {
-  background: #0000FF !important;
-  background-image: none !important;
+  background: linear-gradient(to right, #2563eb, #7c3aed) !important;
+  background-image: linear-gradient(to right, #2563eb, #7c3aed) !important;
   color: white !important;
 }
 
@@ -189,36 +188,21 @@ span, div, p, a, label {
   color: #ffffff !important;
 }
 
-.text-muted-foreground,
-.text-muted {
-  color: #a3a3a3 !important;
-}
-
-/* Loading Screen Animations */
-@keyframes spin {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.1); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) translateX(0px); }
-  25% { transform: translateY(-10px) translateX(5px); }
-  50% { transform: translateY(-5px) translateX(-5px); }
-  75% { transform: translateY(-15px) translateX(3px); }
-}
-
-@keyframes twinkle {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
-}
-
-@keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1); }
+/* Mobile specific fixes - NO BLUE BACKGROUND */
+@media (max-width: 768px) {
+  body, html, #root {
+    background: #000000 !important;
+    background-color: #000000 !important;
+  }
+  
+  /* Remove any blue backgrounds on mobile */
+  * {
+    background-color: inherit !important;
+  }
+  
+  /* Ensure containers stay dark on mobile */
+  div, main, section, article {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
 }
