@@ -3,18 +3,7 @@ import { Link } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Users, Clock, Heart } from 'lucide-react';
-
-interface Campaign {
-  id: string;
-  title: string;
-  description: string;
-  goal: number;
-  location: string;
-  category: string;
-  raised: number;
-  contributors: number;
-  createdAt: string;
-}
+import { Campaign } from '@/lib/supabase';
 
 interface CompactCampaignCardProps {
   campaign: Campaign;
@@ -22,7 +11,7 @@ interface CompactCampaignCardProps {
 
 export function CompactCampaignCard({ campaign }: CompactCampaignCardProps) {
   const progressPercentage = Math.min((campaign.raised / campaign.goal) * 100, 100);
-  const daysAgo = Math.floor((Date.now() - new Date(campaign.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+  const daysAgo = Math.floor((Date.now() - new Date(campaign.created_at).getTime()) / (1000 * 60 * 60 * 24));
 
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -50,11 +39,29 @@ export function CompactCampaignCard({ campaign }: CompactCampaignCardProps) {
   return (
     <Link to={`/campaign/${campaign.id}`}>
       <div className="card-interactive bg-white border border-card-border rounded-xl overflow-hidden">
-        {/* Campaign Image Placeholder */}
-        <div className="relative h-40 sm:h-48 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/20 rounded-full flex items-center justify-center">
-            <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-          </div>
+        {/* Campaign Media */}
+        <div className="relative h-40 sm:h-48 bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
+          {campaign.image_url ? (
+            <img
+              src={campaign.image_url}
+              alt={campaign.title}
+              className="w-full h-full object-cover"
+            />
+          ) : campaign.video_url ? (
+            <video
+              src={campaign.video_url}
+              className="w-full h-full object-cover"
+              muted
+              loop
+              playsInline
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/20 rounded-full flex items-center justify-center">
+                <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+              </div>
+            </div>
+          )}
           {/* Category Badge */}
           <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
             <Badge
@@ -124,7 +131,7 @@ export function CompactCampaignCard({ campaign }: CompactCampaignCardProps) {
             <div className="flex items-center space-x-1">
               <Users className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
-                {campaign.contributors} supporter{campaign.contributors !== 1 ? 's' : ''}
+                {campaign.contributors || 0} supporter{(campaign.contributors || 0) !== 1 ? 's' : ''}
               </span>
             </div>
             <div className="flex items-center space-x-1">

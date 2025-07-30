@@ -1,6 +1,7 @@
-// ContributeButton - Flexible Amount Base Pay Integration
+// ContributeButton - Proper Base Pay Integration
 import { useState } from 'react';
-import { pay, getPaymentStatus } from '@base-org/account';
+import { createBaseAccountSDK, getPaymentStatus } from '@base-org/account';
+import { BasePayButton } from '@base-org/account-ui/react';
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { BASE_PAY_CONFIG } from "@/config/basePay";
-import { BasePayLogo } from "@/components/BasePayLogo";
+import { BasicPayButton } from "@/components/BasicPayButton";
 
 interface PaymentResult {
   success: boolean;
@@ -34,10 +35,14 @@ export function ContributeButton({
   recipientAddress,
   testnet = true
 }: ContributeButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const [customAmount, setCustomAmount] = useState<string>('');
+  const [status, setStatus] = useState('');
 
-
+  // Initialize Base Account SDK
+  const sdk = createBaseAccountSDK({
+    appName: 'FundMe',
+    appLogo: '/basepay.JPG',
+  });
 
   const getCurrentAmount = (): number => {
     const parsed = parseFloat(customAmount);
@@ -48,77 +53,57 @@ export function ContributeButton({
 
 
 
-  // Payment options for Base Pay
-  const paymentOptions = {
-    amount: getCurrentAmount().toFixed(2),
-    to: recipientAddress,
-    testnet: testnet
-  };
+  // Handle payment result from BasePayButton
+  const onPaymentResult = async (result: any) => {
+    console.log('🎯 Payment result:', result);
 
-  // Debug log for network
-  console.log('🌐 Network:', testnet ? 'Base Sepolia (Testnet)' : 'Base Mainnet');
+    if (result.success) {
+      setStatus('🎉 Payment successful!');
 
-  const handleBasePay = async () => {
-    const amount = getCurrentAmount();
-
-    if (amount <= 0) {
-      toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid contribution amount.",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-
-    if (isLoading || disabled) return;
-
-    setIsLoading(true);
-    console.log('🚀 Base Pay payment:', paymentOptions);
-
-    try {
-      const result = await pay(paymentOptions);
-      console.log('✅ Base Pay result:', result);
-
-      // Show success toast
       toast({
         title: "🎉 Payment Successful!",
-        description: `Thank you for contributing $${amount} USDC to this campaign.`,
+        description: `Thank you for contributing $${getCurrentAmount()} USDC!`,
         duration: 5000,
       });
 
-      // Create payment result
+      // Get payment status for more details
+      try {
+        const receipt = await getPaymentStatus(result.id);
+        console.log('📄 Payment receipt:', receipt);
+      } catch (error) {
+        console.log('Could not get payment receipt:', error);
+      }
+
+      // Create payment result for parent component
       const paymentResult: PaymentResult = {
         success: true,
         id: result.id,
         transactionHash: result.transactionHash,
-        blockNumber: result.blockNumber
+        blockNumber: result.blockNumber,
+        amount: getCurrentAmount(),
+        userInfo: result.userInfo
       };
 
       await onContribute(paymentResult);
 
-    } catch (error) {
-      console.error('❌ Base Pay failed:', error);
+    } else {
+      setStatus('Payment failed: ' + result.error);
 
       toast({
         title: "❌ Payment Failed",
-        description: "Payment failed. Please try again.",
+        description: result.error || "Payment failed. Please try again.",
         variant: "destructive",
         duration: 5000,
       });
 
       const paymentResult: PaymentResult = {
         success: false,
-        error: error instanceof Error ? error.message : 'Payment failed'
+        error: result.error || 'Payment failed'
       };
 
       await onContribute(paymentResult);
-    } finally {
-      setIsLoading(false);
     }
   };
-
-
 
   const currentAmount = getCurrentAmount();
   const isValidAmount = currentAmount > 0;
@@ -136,57 +121,70 @@ export function ContributeButton({
           </p>
         </div>
 
-
-
-        {/* Amount Input */}
+        {/* Custom Amount Input */}
         <div className="space-y-2">
           <Label htmlFor="amount" className="text-sm font-medium text-foreground">
-            Enter Amount (USDC)
+            How much would you like to contribute? (USDC)
           </Label>
           <Input
             id="amount"
             type="number"
-            placeholder="Enter amount"
+            placeholder="Enter your contribution amount"
             value={customAmount}
             onChange={(e) => setCustomAmount(e.target.value)}
             className="text-lg h-12"
             min="1"
-            step="1"
+            step="0.01"
           />
+          {getCurrentAmount() > 0 && (
+            <p className="text-xs text-green-600 font-medium">
+              Contributing: ${getCurrentAmount()} USDC
+            </p>
+          )}
         </div>
 
-        {/* Base Pay Button */}
-        <button
-          onClick={handleBasePay}
-          disabled={isLoading || disabled || !isValidAmount}
-          className="base-pay-button w-full font-semibold py-4 px-6 text-lg h-14 rounded-md disabled:opacity-50"
-          style={{
-            backgroundColor: '#0000FF',
-            color: 'white',
-            border: 'none',
-            backgroundImage: 'none'
+        {/* Basic Pay Button - Direct pay() call */}
+        <BasicPayButton
+          amount={getCurrentAmount().toFixed(2)}
+          recipientAddress={recipientAddress}
+          onSuccess={async (result) => {
+            console.log('✅ Payment Success:', result);
+
+            toast({
+              title: "🎉 Payment Successful!",
+              description: `Thank you for contributing $${getCurrentAmount()} USDC!`,
+              duration: 5000,
+            });
+
+            const paymentResult: PaymentResult = {
+              success: true,
+              id: result.id,
+              transactionHash: result.transactionHash,
+              blockNumber: result.blockNumber,
+              amount: getCurrentAmount(),
+              userInfo: result.userInfo
+            };
+
+            await onContribute(paymentResult);
           }}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Processing Payment...
-            </>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-              <img
-                src="/basepay.JPG"
-                alt="BasePay Logo"
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  marginRight: '8px'
-                }}
-              />
-              <span style={{ color: 'black' }}>Base</span><span style={{ color: 'white' }}>Pay</span>
-            </div>
-          )}
-        </button>
+          onError={async (error) => {
+            console.error('❌ Payment Error:', error);
+
+            toast({
+              title: "❌ Payment Failed",
+              description: error.message || "Payment failed. Please try again.",
+              variant: "destructive",
+              duration: 5000,
+            });
+
+            const paymentResult: PaymentResult = {
+              success: false,
+              error: error.message || 'Payment failed'
+            };
+
+            await onContribute(paymentResult);
+          }}
+        />
 
         {/* Security Note */}
         <p className="text-xs text-muted-foreground text-center">

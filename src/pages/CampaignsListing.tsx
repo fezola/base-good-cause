@@ -7,21 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Users, Heart, Shield, ArrowRight, Star, Filter } from 'lucide-react';
+import { campaignService } from '@/services/campaignService';
+import { Campaign } from '@/lib/supabase';
 
-interface Campaign {
-  id: string;
-  title: string;
-  description: string;
-  goal: number;
-  location: string;
-  beneficiaries: number;
-  category: string;
-  recipientAddress: string;
-  createdAt: string;
-  raised: number;
-  contributors: number;
-  status: string;
-}
+// Using Campaign interface from Supabase
 
 export function CampaignsListing() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -29,7 +18,12 @@ export function CampaignsListing() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
-  const [showLoading, setShowLoading] = useState(true);
+
+  // Only show loading screen on first visit
+  const [showLoading, setShowLoading] = useState(() => {
+    const hasSeenLoading = localStorage.getItem('fundme_has_seen_loading');
+    return !hasSeenLoading;
+  });
 
   const categories = [
     { value: 'all', label: 'All Categories' },
@@ -51,12 +45,20 @@ export function CampaignsListing() {
     filterCampaigns();
   }, [campaigns, searchTerm, selectedCategory]);
 
-  const loadCampaigns = () => {
+  const loadCampaigns = async () => {
     try {
-      const savedCampaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
-      setCampaigns(savedCampaigns);
+      const supabaseCampaigns = await campaignService.getCampaigns();
+      setCampaigns(supabaseCampaigns);
     } catch (error) {
-      console.error('Failed to load campaigns:', error);
+      console.error('Failed to load campaigns from Supabase:', error);
+      // Fallback to localStorage for now
+      try {
+        const savedCampaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
+        setCampaigns(savedCampaigns);
+      } catch (localError) {
+        console.error('Failed to load campaigns from localStorage:', localError);
+        setCampaigns([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -109,7 +111,10 @@ export function CampaignsListing() {
   };
 
   if (showLoading) {
-    return <LoadingScreen onComplete={() => setShowLoading(false)} />;
+    return <LoadingScreen onComplete={() => {
+      localStorage.setItem('fundme_has_seen_loading', 'true');
+      setShowLoading(false);
+    }} />;
   }
 
   if (loading) {
@@ -243,6 +248,8 @@ export function CampaignsListing() {
             </div>
           </div>
         </div>
+
+
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -25,6 +25,9 @@ import {
   Settings
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { campaignService } from '@/services/campaignService';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 interface CampaignData {
   title: string;
@@ -37,10 +40,12 @@ interface CampaignData {
   imageUrl?: string;
   videoUrl?: string;
   mediaFiles?: File[];
+  duration: number; // Campaign duration in days
 }
 
 export function CreateCampaign() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<CampaignData>({
@@ -53,7 +58,8 @@ export function CreateCampaign() {
     recipientAddress: '',
     imageUrl: '',
     videoUrl: '',
-    mediaFiles: []
+    mediaFiles: [],
+    duration: 30 // Default 30 days
   });
 
   const totalSteps = 4;
@@ -103,7 +109,16 @@ export function CreateCampaign() {
     }));
   };
 
-  const handleFileUpload = (files: FileList | null) => {
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileUpload = async (files: FileList | null) => {
     if (files) {
       const fileArray = Array.from(files);
       // Filter for images and videos only
@@ -120,10 +135,38 @@ export function CreateCampaign() {
         });
       }
 
-      setFormData(prev => ({
-        ...prev,
-        mediaFiles: [...(prev.mediaFiles || []), ...validFiles]
-      }));
+      // Convert all files to base64 for storage
+      try {
+        const base64Files = await Promise.all(
+          validFiles.map(async (file) => ({
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            data: await convertFileToBase64(file)
+          }))
+        );
+
+        setFormData(prev => ({
+          ...prev,
+          imageUrl: base64Files.find(f => f.type.startsWith('image/'))?.data || prev.imageUrl,
+          videoUrl: base64Files.find(f => f.type.startsWith('video/'))?.data || prev.videoUrl,
+          mediaFiles: [...(prev.mediaFiles || []), ...validFiles] // Keep for preview
+        }));
+
+        toast({
+          title: "Files Uploaded",
+          description: `${base64Files.length} file(s) uploaded successfully`,
+          duration: 3000,
+        });
+
+      } catch (error) {
+        toast({
+          title: "Upload Failed",
+          description: "Failed to process uploaded files",
+          variant: "destructive",
+          duration: 3000,
+        });
+      }
     }
   };
 
@@ -177,10 +220,30 @@ export function CreateCampaign() {
       return;
     }
 
-    if (formData.goal < 1) {
+    // Validate Ethereum address format
+    const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
+    if (!ethAddressRegex.test(formData.recipientAddress)) {
+      toast({
+        title: "❌ Invalid Wallet Address",
+        description: "Please enter a valid Ethereum address (42 characters starting with 0x)",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (formData.goal < 100) {
       toast({
         title: "❌ Invalid Goal",
-        description: "Goal must be at least $1",
+        description: "Goal must be at least $100",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (formData.goal > 1000000) {
+      toast({
+        title: "❌ Invalid Goal",
+        description: "Goal cannot exceed $1,000,000",
         variant: "destructive"
       });
       return;
@@ -189,24 +252,45 @@ export function CreateCampaign() {
     setIsCreating(true);
 
     try {
-      // Generate unique campaign ID
-      const campaignId = generateCampaignId();
-      
-      // Save campaign to localStorage (in real app, this would be a database)
-      const campaign = {
-        id: campaignId,
-        ...formData,
-        createdAt: new Date().toISOString(),
-        raised: 0,
-        contributors: 0,
-        status: 'active',
-        creatorId: getCreatorId()
+      // Check if user is authenticated
+      if (!user) {
+        toast({
+          title: "❌ Authentication Required",
+          description: "Please sign in to create a campaign",
+          variant: "destructive"
+        });
+        navigate('/auth');
+        return;
+      }
+
+      // Step 1: Create campaign on smart contract first
+      const goalInEth = formData.goal / 3000; // Convert from USD to ETH (rough conversion: $3000 = 1 ETH)
+
+      const contractResult = await contractService.createCampaign(
+        formData.title,
+        formData.description,
+        goalInEth,
+        formData.duration
+      );
+
+      // Step 2: Create campaign in Supabase with contract ID
+      const campaignData = {
+        title: formData.title,
+        description: formData.description,
+        goal: formData.goal,
+        location: formData.location,
+        beneficiaries: formData.beneficiaries,
+        category: formData.category,
+        recipient_address: formData.recipientAddress,
+        image_url: formData.imageUrl,
+        video_url: formData.videoUrl,
+        user_id: user.id,
+        status: 'active' as const,
+        duration: formData.duration,
+        contract_campaign_id: contractResult.campaignId // Link to smart contract
       };
 
-      // Get existing campaigns
-      const existingCampaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
-      existingCampaigns.push(campaign);
-      localStorage.setItem('basefunded_campaigns', JSON.stringify(existingCampaigns));
+      const campaign = await campaignService.createCampaign(campaignData);
 
       toast({
         title: "🎉 Campaign Created!",
@@ -215,14 +299,16 @@ export function CreateCampaign() {
       });
 
       // Navigate to the new campaign
-      navigate(`/campaign/${campaignId}`);
+      navigate(`/campaign/${campaign.id}`);
 
     } catch (error) {
       console.error('Failed to create campaign:', error);
+
       toast({
         title: "❌ Creation Failed",
         description: "Failed to create campaign. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     } finally {
       setIsCreating(false);
@@ -248,7 +334,8 @@ export function CreateCampaign() {
       case 2:
         return formData.description.trim();
       case 3:
-        return formData.goal > 0 && formData.location.trim() && formData.recipientAddress.trim();
+        const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
+        return formData.goal >= 100 && formData.goal <= 1000000 && formData.location.trim() && formData.recipientAddress.trim() && ethAddressRegex.test(formData.recipientAddress) && formData.duration > 0;
       case 4:
         return true;
       default:
@@ -500,11 +587,43 @@ export function CreateCampaign() {
                       value={formData.goal}
                       onChange={(e) => handleInputChange('goal', parseInt(e.target.value) || 0)}
                       className="pl-12 form-input text-lg"
-                      min="1"
+                      min="100"
+                      max="1000000"
                     />
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Set a realistic goal that covers your needs
+                    Minimum $100, Maximum $1,000,000. Set a realistic goal that covers your needs.
+                  </p>
+                </div>
+
+                {/* Campaign Duration */}
+                <div className="space-y-3">
+                  <Label htmlFor="duration" className="form-label">Campaign Duration *</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {[
+                      { days: 7, label: '1 Week' },
+                      { days: 14, label: '2 Weeks' },
+                      { days: 30, label: '1 Month' },
+                      { days: 60, label: '2 Months' },
+                      { days: 90, label: '3 Months' }
+                    ].map((option) => (
+                      <button
+                        key={option.days}
+                        type="button"
+                        onClick={() => handleInputChange('duration', option.days)}
+                        className={`p-3 border rounded-lg text-center transition-all ${
+                          formData.duration === option.days
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="font-medium">{option.label}</div>
+                        <div className="text-sm text-muted-foreground">{option.days} days</div>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Choose how long your campaign will run. You can withdraw funds when 70% is reached.
                   </p>
                 </div>
 
@@ -584,8 +703,18 @@ export function CreateCampaign() {
                     <p className="text-muted-foreground">${formData.goal.toLocaleString()}</p>
                   </div>
                   <div>
+                    <h3 className="font-semibold text-foreground mb-2">Duration</h3>
+                    <p className="text-muted-foreground">{formData.duration} days</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <h3 className="font-semibold text-foreground mb-2">Category</h3>
                     <p className="text-muted-foreground">{categories.find(c => c.value === formData.category)?.label}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-2">Beneficiaries</h3>
+                    <p className="text-muted-foreground">{formData.beneficiaries} people</p>
                   </div>
                 </div>
                 <div>

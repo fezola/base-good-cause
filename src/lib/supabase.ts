@@ -24,6 +24,10 @@ export interface Campaign {
   user_id: string
   status: 'active' | 'completed' | 'paused'
   image_url?: string
+  video_url?: string
+  contract_campaign_id?: number // Smart contract campaign ID
+  duration?: number // Campaign duration in days
+  contributors?: number // Calculated field
 }
 
 export interface Contribution {

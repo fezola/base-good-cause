@@ -103,6 +103,9 @@ export function ModernHeader({ onSearch, showSearch = true }: ModernHeaderProps)
                     <DropdownMenuItem asChild>
                       <Link to="/my-campaigns">My Campaigns</Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/test-vault">🧪 Test Vault</Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="w-4 h-4 mr-2" />

@@ -29,6 +29,8 @@ interface Campaign {
   createdAt: string;
   status: 'active' | 'paused' | 'completed';
   creatorId: string;
+  imageUrl?: string;
+  videoUrl?: string;
 }
 
 export function MyCampaigns() {

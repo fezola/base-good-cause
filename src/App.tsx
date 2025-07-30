@@ -14,6 +14,7 @@ import { CampaignPage } from "./pages/CampaignPage";
 import { CampaignsListing } from "./pages/CampaignsListing";
 import { MyCampaigns } from "./pages/MyCampaigns";
 import { AuthPage } from "./pages/AuthPage";
+import { TestVault } from "./pages/TestVault";
 import DevStatus from "./pages/DevStatus";
 import NotFound from "./pages/NotFound";
 
@@ -49,6 +50,11 @@ const App = () => {
             } />
             <Route path="/campaign/:campaignId" element={<CampaignPage />} />
             <Route path="/demo" element={<BaseFunded />} />
+            <Route path="/test-vault" element={
+              <ProtectedRoute>
+                <TestVault />
+              </ProtectedRoute>
+            } />
             <Route path="/dev-status" element={<DevStatus />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

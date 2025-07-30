@@ -36,11 +36,19 @@ export function ContributorsList({ contributors, className }: ContributorsListPr
     return address.slice(2, 4).toUpperCase();
   };
 
-  const formatTimeAgo = (date: string | Date) => {
+  const formatTimeAgo = (date: string | Date | undefined) => {
+    if (!date) return "recently";
+
     const now = new Date();
     const contributorDate = typeof date === 'string' ? new Date(date) : date;
+
+    // Check if date is valid
+    if (!contributorDate || isNaN(contributorDate.getTime())) {
+      return "recently";
+    }
+
     const diffInMinutes = Math.floor((now.getTime() - contributorDate.getTime()) / (1000 * 60));
-    
+
     if (diffInMinutes < 1) return "just now";
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
@@ -73,19 +81,19 @@ export function ContributorsList({ contributors, className }: ContributorsListPr
               <div className="flex items-center space-x-3">
                 <Avatar className="h-10 w-10 border-2 border-primary/10">
                   <AvatarFallback className="bg-gradient-primary text-primary-foreground text-sm font-medium">
-                    {getAvatarInitials(contributor.address)}
+                    {getAvatarInitials(contributor.address || contributor.wallet_address || 'Anonymous')}
                   </AvatarFallback>
                 </Avatar>
-                
+
                 <div>
                   <div className="font-medium text-foreground">
                     {contributor.userInfo?.name?.firstName
                       ? `${contributor.userInfo.name.firstName} ${contributor.userInfo.name.familyName || ''}`.trim()
-                      : contributor.ensName || formatAddress(contributor.address)
+                      : contributor.ensName || formatAddress(contributor.address || contributor.wallet_address || 'Anonymous')
                     }
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {formatTimeAgo(contributor.timestamp)}
+                    {formatTimeAgo(contributor.timestamp || contributor.created_at)}
                   </div>
                 </div>
               </div>

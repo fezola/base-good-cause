@@ -9,6 +9,13 @@ import { StatsCards } from '@/components/StatsCards';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+import { campaignService } from '@/services/campaignService';
+import { Campaign } from '@/lib/supabase';
+import { WithdrawButton } from '@/components/WithdrawButton';
+import { RefundButton } from '@/components/RefundButton';
+import { CampaignAnalytics } from '@/components/CampaignAnalytics';
+import { useAuth } from '@/contexts/AuthContext';
+import { vaultService } from '@/services/vaultService';
 import {
   ArrowLeft,
   Share2,
@@ -25,20 +32,7 @@ import {
 } from 'lucide-react';
 import { BASE_PAY_CONFIG } from '@/config/basePay';
 
-interface Campaign {
-  id: string;
-  title: string;
-  description: string;
-  goal: number;
-  location: string;
-  beneficiaries: number;
-  category: string;
-  recipientAddress: string;
-  createdAt: string;
-  raised: number;
-  contributors: number;
-  status: string;
-}
+// Using Campaign interface from Supabase
 
 interface PaymentResult {
   success: boolean;
@@ -51,6 +45,7 @@ interface PaymentResult {
 
 export function CampaignPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
+  const { user } = useAuth();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [contributors, setContributors] = useState<any[]>([]);
@@ -59,21 +54,34 @@ export function CampaignPage() {
     loadCampaign();
   }, [campaignId]);
 
-  const loadCampaign = () => {
+  const loadCampaign = async () => {
     try {
-      const campaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
-      const foundCampaign = campaigns.find((c: Campaign) => c.id === campaignId);
+      if (!campaignId) return;
 
-      if (foundCampaign) {
-        setCampaign(foundCampaign);
+      // Load campaign from Supabase
+      const supabaseCampaign = await campaignService.getCampaign(campaignId);
+      setCampaign(supabaseCampaign);
 
-        // Load contributors for this campaign
-        const allContributors = JSON.parse(localStorage.getItem('basefunded_contributors') || '[]');
-        const campaignContributors = allContributors.filter((c: any) => c.campaignId === campaignId);
-        setContributors(campaignContributors);
-      }
+      // Load contributors for this campaign
+      const campaignContributors = await campaignService.getCampaignContributions(campaignId);
+      setContributors(campaignContributors);
+
     } catch (error) {
-      console.error('Failed to load campaign:', error);
+      console.error('Failed to load campaign from Supabase:', error);
+      // Fallback to localStorage
+      try {
+        const campaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
+        const foundCampaign = campaigns.find((c: any) => c.id === campaignId);
+
+        if (foundCampaign) {
+          setCampaign(foundCampaign);
+          const allContributors = JSON.parse(localStorage.getItem('basefunded_contributors') || '[]');
+          const campaignContributors = allContributors.filter((c: any) => c.campaignId === campaignId);
+          setContributors(campaignContributors);
+        }
+      } catch (localError) {
+        console.error('Failed to load campaign from localStorage:', localError);
+      }
     } finally {
       setLoading(false);
     }
@@ -83,52 +91,42 @@ export function CampaignPage() {
     if (!campaign || !result.success) return;
 
     try {
-      // Create contributor record
-      const contributor = {
-        id: Date.now().toString(),
-        campaignId: campaign.id,
-        amount: 5, // Default contribution amount
-        address: campaign.recipientAddress, // Placeholder - in real app this would be the payer's address
-        transactionHash: result.transactionHash,
-        blockNumber: result.blockNumber,
-        timestamp: new Date().toISOString(),
-        userInfo: result.userInfo
+      if (!user) {
+        toast({
+          title: "❌ Authentication Required",
+          description: "Please sign in to contribute to campaigns",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Record contribution in vault service
+      const contributionData = {
+        campaign_id: campaign.id,
+        user_id: user.id,
+        amount: result.amount || 25, // Use actual payment amount or default to 25
+        transaction_hash: result.transactionHash || null, // BasePay doesn't provide blockchain tx hash
+        payment_id: result.id || `basepay_${Date.now()}`,
+        wallet_address: result.userInfo?.walletAddress || 'basepay_user',
+        status: 'confirmed' as const
       };
 
-      // Save contributor
-      const existingContributors = JSON.parse(localStorage.getItem('basefunded_contributors') || '[]');
-      existingContributors.push(contributor);
-      localStorage.setItem('basefunded_contributors', JSON.stringify(existingContributors));
+      await vaultService.recordContribution(contributionData);
 
-      // Update campaign totals
-      const updatedCampaign = {
-        ...campaign,
-        raised: campaign.raised + 5,
-        contributors: campaign.contributors + 1
-      };
+      // Reload campaign to get updated totals
+      await loadCampaign();
 
-      // Update campaigns list
-      const campaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
-      const updatedCampaigns = campaigns.map((c: Campaign) =>
-          c.id === campaign.id ? updatedCampaign : c
-      );
-      localStorage.setItem('basefunded_campaigns', JSON.stringify(updatedCampaigns));
-
-      // Update local state
-      setCampaign(updatedCampaign);
-      setContributors(prev => [...prev, contributor]);
-
-      console.log('✅ Campaign updated:', {
-        newTotal: updatedCampaign.raised,
-        totalContributors: updatedCampaign.contributors,
-        transactionHash: result.transactionHash
+      toast({
+        title: "🎉 Thank you for your contribution!",
+        description: `You've successfully contributed $${contributionData.amount} to ${campaign.title}`,
+        duration: 5000,
       });
 
     } catch (error) {
-      console.error('❌ Failed to update campaign:', error);
+      console.error('Failed to record contribution:', error);
       toast({
-        title: "⚠️ Update Failed",
-        description: "Payment succeeded but failed to update campaign. Please refresh the page.",
+        title: "❌ Error",
+        description: "Failed to record your contribution. Please contact support.",
         variant: "destructive",
         duration: 5000,
       });
@@ -203,7 +201,7 @@ export function CampaignPage() {
   }
 
   const progressPercentage = Math.min((campaign.raised / campaign.goal) * 100, 100);
-  const daysAgo = Math.floor((Date.now() - new Date(campaign.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+  const daysAgo = Math.floor((Date.now() - new Date(campaign.created_at).getTime()) / (1000 * 60 * 60 * 24));
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -290,6 +288,26 @@ export function CampaignPage() {
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4 leading-tight">
                   {campaign.title}
                 </h1>
+
+                {/* Campaign Media */}
+                {(campaign.image_url || campaign.video_url) && (
+                  <div className="mb-6 rounded-lg overflow-hidden">
+                    {campaign.image_url ? (
+                      <img
+                        src={campaign.image_url}
+                        alt={campaign.title}
+                        className="w-full h-64 sm:h-80 lg:h-96 object-cover"
+                      />
+                    ) : campaign.video_url ? (
+                      <video
+                        src={campaign.video_url}
+                        className="w-full h-64 sm:h-80 lg:h-96 object-cover"
+                        controls
+                        playsInline
+                      />
+                    ) : null}
+                  </div>
+                )}
 
                 <div className="flex items-center space-x-6 text-muted-foreground mb-6">
                   {campaign.location && (
@@ -403,7 +421,7 @@ export function CampaignPage() {
                   <ContributeButton
                       onContribute={handleContribute}
                       className="w-full text-lg py-4"
-                      recipientAddress={campaign.recipientAddress}
+                      recipientAddress={campaign.recipient_address}
                       testnet={BASE_PAY_CONFIG.TESTNET}
                   />
 
@@ -413,6 +431,38 @@ export function CampaignPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Campaign Analytics - Only for campaign creator */}
+                {user && user.id === campaign.user_id && (
+                  <CampaignAnalytics
+                    campaign={campaign}
+                    className="mt-6"
+                  />
+                )}
+
+                {/* Withdraw Button - Only for campaign creator */}
+                {user && user.id === campaign.user_id && (
+                  <WithdrawButton
+                    campaignId={campaign.id}
+                    campaignTitle={campaign.title}
+                    goalAmount={campaign.goal}
+                    raisedAmount={campaign.raised}
+                    creatorAddress={campaign.recipient_address}
+                    className="mt-6"
+                  />
+                )}
+
+                {/* Refund Button - Only for contributors */}
+                {user && user.id !== campaign.user_id && (
+                  <RefundButton
+                    campaignId={campaign.id}
+                    campaignTitle={campaign.title}
+                    goalAmount={campaign.goal}
+                    raisedAmount={campaign.raised}
+                    deadline={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()} // 30 days from now
+                    className="mt-6"
+                  />
+                )}
 
                 {/* Share Card */}
                 <div className="card-elevated bg-white p-6">
