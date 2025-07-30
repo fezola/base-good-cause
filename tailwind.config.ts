@@ -21,26 +21,37 @@ export default {
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
+				'input-focus': 'hsl(var(--input-focus))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
-					glow: 'hsl(var(--primary-glow))'
+					hover: 'hsl(var(--primary-hover))',
+					light: 'hsl(var(--primary-light))',
+					dark: 'hsl(var(--primary-dark))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
+					foreground: 'hsl(var(--secondary-foreground))',
+					hover: 'hsl(var(--secondary-hover))'
 				},
 				success: {
 					DEFAULT: 'hsl(var(--success))',
 					foreground: 'hsl(var(--success-foreground))',
-					glow: 'hsl(var(--success-glow))'
+					light: 'hsl(var(--success-light))',
+					dark: 'hsl(var(--success-dark))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))',
+					light: 'hsl(var(--warning-light))'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
+					foreground: 'hsl(var(--destructive-foreground))',
+					light: 'hsl(var(--destructive-light))'
 				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
@@ -56,7 +67,8 @@ export default {
 				},
 				card: {
 					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
+					foreground: 'hsl(var(--card-foreground))',
+					border: 'hsl(var(--card-border))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -125,9 +137,12 @@ export default {
 				'gradient-hero': 'var(--gradient-hero)'
 			},
 			boxShadow: {
-				'elevation': 'var(--shadow-elevation)',
-				'glow': 'var(--shadow-glow)',
-				'success': 'var(--shadow-success)'
+				'sm': 'var(--shadow-sm)',
+				'md': 'var(--shadow-md)',
+				'lg': 'var(--shadow-lg)',
+				'xl': 'var(--shadow-xl)',
+				'card': 'var(--shadow-card)',
+				'button': 'var(--shadow-button)'
 			}
 		}
 	},

@@ -93,8 +93,8 @@
 
 /* Progress Bar Glow */
 .progress-glow {
-  background: var(--dark-gradient-success);
-  box-shadow: 0 0 15px rgba(79, 172, 254, 0.4);
+  background: #0000FF;
+  box-shadow: 0 0 15px rgba(0, 0, 255, 0.4);
 }
 
 /* Button Styles */

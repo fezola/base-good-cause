@@ -1,10 +1,12 @@
-// Campaigns Listing Page - Modern Mobile-First Design
+// Professional Campaigns Listing - GoFundMe-inspired Design
 import { useState, useEffect } from 'react';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { ModernHeader } from '@/components/ModernHeader';
 import { CompactCampaignCard } from '@/components/CompactCampaignCard';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'react-router-dom';
+import { TrendingUp, Users, Heart, Shield, ArrowRight, Star, Filter } from 'lucide-react';
 
 interface Campaign {
   id: string;
@@ -112,71 +114,191 @@ export function CampaignsListing() {
 
   if (loading) {
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-            <p className="text-gray-600 text-sm">Loading campaigns...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+            <p className="text-muted-foreground text-sm">Loading campaigns...</p>
           </div>
         </div>
     );
   }
 
   return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Modern Header */}
+      <div className="min-h-screen bg-background">
+        {/* Professional Header */}
         <ModernHeader onSearch={handleSearch} />
 
+        {/* Hero Section */}
+        <section className="relative bg-gray-900 text-white py-20 lg:py-32 overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }} />
+          </div>
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="mb-8">
+              <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
+                <Heart className="w-4 h-4" fill="currentColor" />
+                <span className="text-sm font-medium">Trusted by thousands of supporters</span>
+              </div>
+            </div>
+
+            <h1 className="text-5xl lg:text-7xl font-bold mb-6 leading-tight">
+              Fund What
+              <span className="block text-white">
+                Matters Most
+              </span>
+            </h1>
+
+            <p className="text-xl lg:text-2xl text-gray-200 mb-10 max-w-4xl mx-auto leading-relaxed">
+              Join a community of changemakers. Discover meaningful campaigns, support causes you care about,
+              and help make a lasting difference in communities around the world.
+            </p>
+
+            <div className="flex justify-center mb-12">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-white text-white hover:bg-white hover:text-gray-900 font-semibold px-8 py-4 text-lg backdrop-blur-sm"
+              >
+                Learn How It Works
+              </Button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto">
+              <div className="text-center">
+                <div className="text-3xl font-bold mb-1">$2.5M+</div>
+                <div className="text-gray-300 text-sm">Raised for causes</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold mb-1">10K+</div>
+                <div className="text-gray-300 text-sm">Active supporters</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold mb-1">500+</div>
+                <div className="text-gray-300 text-sm">Successful campaigns</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Trust Indicators */}
+        <section className="bg-white py-12 border-b border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 bg-success-light rounded-full flex items-center justify-center mb-4">
+                  <Shield className="w-6 h-6 text-success" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Secure & Trusted</h3>
+                <p className="text-muted-foreground">Your donations are protected with blockchain security</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <Users className="w-6 h-6 text-gray-600" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Community Driven</h3>
+                <p className="text-muted-foreground">Join thousands of supporters making a difference</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 bg-warning-light rounded-full flex items-center justify-center mb-4">
+                  <TrendingUp className="w-6 h-6 text-warning" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Transparent Impact</h3>
+                <p className="text-muted-foreground">Track exactly how your contributions are used</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Category Filter */}
-        <div className="bg-white border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex space-x-2 overflow-x-auto pb-2">
-              {categories.map(cat => (
-                  <button
-                      key={cat.value}
-                      onClick={() => setSelectedCategory(cat.value)}
-                      className={`
-                  px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors
-                  ${selectedCategory === cat.value
-                          ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }
-                `}
-                  >
-                    {cat.label}
-                  </button>
-              ))}
+        <div className="bg-white border-b border-border sticky top-16 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">Filter by category:</span>
+                </div>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="text-sm text-muted-foreground">
+                {filteredCampaigns.length} campaign{filteredCampaigns.length !== 1 ? 's' : ''} found
+              </div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 py-6">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {filteredCampaigns.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="text-4xl mb-4">🚀</div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">
+              <div className="text-center py-20">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Heart className="w-12 h-12 text-gray-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-foreground mb-4">
                   {campaigns.length === 0 ? "Start Something Amazing" : "No Results Found"}
                 </h2>
-                <p className="text-gray-600 mb-6 text-sm">
+                <p className="text-muted-foreground mb-8 text-lg max-w-md mx-auto">
                   {campaigns.length === 0
-                      ? "Be the first to create a campaign and make a difference"
-                      : "Try adjusting your search or browse different categories"
+                      ? "Be the first to create a campaign and make a difference in your community"
+                      : "Try adjusting your search or browse different categories to find campaigns"
                   }
                 </p>
-                <Link to="/create">
-                  <Button className="bg-gradient-to-r from-blue-600 to-blue-700">
-                    Create Campaign
-                  </Button>
-                </Link>
               </div>
           ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredCampaigns.map((campaign) => (
-                    <CompactCampaignCard key={campaign.id} campaign={campaign} />
-                ))}
-              </div>
+              <>
+                {/* Results Header */}
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground">
+                      {selectedCategory === 'all' ? 'All Campaigns' : categories.find(c => c.value === selectedCategory)?.label}
+                    </h2>
+                    <p className="text-muted-foreground mt-1">
+                      {filteredCampaigns.length} campaign{filteredCampaigns.length !== 1 ? 's' : ''} found
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Star className="w-4 h-4 text-warning" />
+                    <span className="text-sm text-muted-foreground">Featured campaigns</span>
+                  </div>
+                </div>
+
+                {/* Campaigns Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredCampaigns.map((campaign) => (
+                      <CompactCampaignCard key={campaign.id} campaign={campaign} />
+                  ))}
+                </div>
+
+                {/* Load More Button */}
+                {filteredCampaigns.length >= 9 && (
+                  <div className="text-center mt-12">
+                    <Button variant="outline" size="lg" className="px-8">
+                      Load More Campaigns
+                    </Button>
+                  </div>
+                )}
+              </>
           )}
         </main>
+
+
       </div>
   );
 }

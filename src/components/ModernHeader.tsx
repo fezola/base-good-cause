@@ -1,7 +1,16 @@
-// Modern Header - Clean & Mobile-First
+// Professional Header - GoFundMe-inspired Design
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { Search, Heart, Menu, X, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ModernHeaderProps {
   onSearch?: (query: string) => void;
@@ -10,59 +19,174 @@ interface ModernHeaderProps {
 
 export function ModernHeader({ onSearch, showSearch = true }: ModernHeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch?.(searchQuery);
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
-    <header className="bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Top Row */}
-        <div className="flex items-center justify-between mb-4">
+    <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">B</span>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur opacity-50" />
+          <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
+            <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+              <Heart className="w-5 h-5 text-white" fill="currentColor" />
             </div>
-            <div className="hidden sm:block">
-              <span className="font-bold text-xl">
-                <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                  Base
-                </span>
-                <span className="bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-                  Fund
-                </span>
-              </span>
-            </div>
+            <span className="font-bold text-2xl text-foreground">
+              BaseFund
+            </span>
           </Link>
 
-          {/* Create Button */}
-          <Link to="/create">
-            <Button
-              size="sm"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link
+              to="/"
+              className="text-foreground hover:text-gray-600 font-medium transition-colors duration-200"
             >
-              Create
-            </Button>
-          </Link>
+              Discover
+            </Link>
+            <Link
+              to="/my-campaigns"
+              className="text-foreground hover:text-gray-600 font-medium transition-colors duration-200"
+            >
+              My Campaigns
+            </Link>
+          </nav>
+
+          {/* Search Bar - Desktop */}
+          {showSearch && (
+            <div className="hidden lg:flex flex-1 max-w-lg mx-8">
+              <form onSubmit={handleSearch} className="w-full">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search campaigns..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:border-input-focus focus:ring-2 focus:ring-ring/20 transition-colors duration-200 bg-background text-sm"
+                  />
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Right Side Actions */}
+          <div className="flex items-center space-x-4">
+            {user ? (
+              <>
+                {/* Create Campaign Button */}
+                <Link to="/create">
+                  <Button
+                    size="sm"
+                    className="bg-gray-900 hover:bg-gray-800 text-white hidden sm:inline-flex"
+                  >
+                    Start Campaign
+                  </Button>
+                </Link>
+
+                {/* User Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                      <User className="w-4 h-4" />
+                      <span className="hidden sm:inline">{user.email}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-campaigns">My Campaigns</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <Button variant="ghost" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/auth">
+                  <Button size="sm" className="bg-gray-900 hover:bg-gray-800 text-white">
+                    Start Campaign
+                  </Button>
+                </Link>
+              </>
+            )}
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors duration-200"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Search Row */}
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-border bg-white">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <Link
+                to="/"
+                className="block px-3 py-2 text-foreground hover:text-gray-600 hover:bg-secondary rounded-md font-medium transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Discover
+              </Link>
+              <Link
+                to="/my-campaigns"
+                className="block px-3 py-2 text-foreground hover:text-gray-600 hover:bg-secondary rounded-md font-medium transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                My Campaigns
+              </Link>
+              <Link
+                to="/create"
+                className="block px-3 py-2 text-foreground hover:text-gray-600 hover:bg-secondary rounded-md font-medium transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Start a Campaign
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Search Bar */}
         {showSearch && (
-          <form onSubmit={handleSearch} className="relative">
-            <input
-              type="text"
-              placeholder="Search campaigns..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            />
-          </form>
+          <div className="lg:hidden py-3 border-t border-border">
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search campaigns..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:border-input-focus focus:ring-2 focus:ring-ring/20 transition-colors duration-200 bg-background text-sm"
+                />
+              </div>
+            </form>
+          </div>
         )}
       </div>
     </header>

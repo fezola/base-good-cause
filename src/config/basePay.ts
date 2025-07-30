@@ -9,7 +9,10 @@ export const BASE_PAY_CONFIG = {
   // Platform Configuration
   PLATFORM_NAME: import.meta.env.VITE_PLATFORM_NAME || 'BaseFunded',
   PLATFORM_DESCRIPTION: import.meta.env.VITE_PLATFORM_DESCRIPTION || 'Decentralized Crowdfunding Platform',
-  DEFAULT_CONTRIBUTION_AMOUNT: import.meta.env.VITE_DEFAULT_CONTRIBUTION_AMOUNT || '10',
+
+  // Contribution Configuration
+  PRESET_AMOUNTS: [5, 10, 25, 50, 100], // Default preset amounts for flexible contributions
+  DEFAULT_SELECTED_AMOUNT: 10, // Default selected amount
   
   // Campaign Details
   CAMPAIGN: {

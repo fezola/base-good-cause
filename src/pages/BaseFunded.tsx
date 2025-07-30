@@ -112,7 +112,7 @@ const BaseFunded = () => {
               href={explorerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-500 hover:text-blue-700 underline text-xs"
+              className="text-gray-600 hover:text-gray-800 underline text-xs"
             >
               View on Block Explorer →
             </a>
@@ -137,8 +137,8 @@ const BaseFunded = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">B</span>
+              <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">B</span>
               </div>
               <h1 className="text-xl font-bold text-foreground">BaseFunded</h1>
             </div>
@@ -194,7 +194,6 @@ const BaseFunded = () => {
 
 
               <ContributeButton
-                amount={CAMPAIGN_DATA.contributionAmount}
                 onContribute={handleContribute}
                 className="w-full max-w-md mx-auto"
                 recipientAddress={BASE_PAY_CONFIG.RECIPIENT_ADDRESS}
@@ -250,7 +249,7 @@ const BaseFunded = () => {
               <div className="mt-2">
                 <Link
                   to="/dev-status"
-                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                  className="text-xs text-gray-600 hover:text-gray-800 underline"
                 >
                   🔧 Development Status
                 </Link>

@@ -1,7 +1,8 @@
-// Compact Campaign Card - Mobile-First Design
+// Professional Campaign Card - GoFundMe-inspired Design
 import { Link } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { MapPin, Users, Clock, Heart } from 'lucide-react';
 
 interface Campaign {
   id: string;
@@ -21,70 +22,114 @@ interface CompactCampaignCardProps {
 
 export function CompactCampaignCard({ campaign }: CompactCampaignCardProps) {
   const progressPercentage = Math.min((campaign.raised / campaign.goal) * 100, 100);
+  const daysAgo = Math.floor((Date.now() - new Date(campaign.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      education: 'bg-blue-100 text-blue-700 border-blue-200',
+      health: 'bg-red-100 text-red-700 border-red-200',
+      community: 'bg-green-100 text-green-700 border-green-200',
+      environment: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+      technology: 'bg-purple-100 text-purple-700 border-purple-200',
+      arts: 'bg-pink-100 text-pink-700 border-pink-200',
+      emergency: 'bg-orange-100 text-orange-700 border-orange-200',
+      other: 'bg-gray-100 text-gray-700 border-gray-200'
+    };
+    return colors[category as keyof typeof colors] || colors.other;
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   return (
     <Link to={`/campaign/${campaign.id}`}>
-      <div className="group relative bg-gray-900 rounded-xl border border-gray-800 hover:border-gray-700 transition-all duration-300 hover:scale-[1.02] p-5 overflow-hidden">
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Glow Effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300" />
-
-        <div className="relative z-10">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="px-2 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full border border-blue-500/30">
-              <span className="text-xs text-blue-300 font-medium">
-                {campaign.category}
-              </span>
-            </div>
-            <div className="text-xs text-gray-500">
-              {new Date(campaign.createdAt).toLocaleDateString()}
-            </div>
+      <div className="card-interactive bg-white border border-card-border rounded-xl overflow-hidden">
+        {/* Campaign Image Placeholder */}
+        <div className="relative h-48 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+          <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+            <Heart className="w-8 h-8 text-primary" />
           </div>
+          {/* Category Badge */}
+          <div className="absolute top-3 left-3">
+            <Badge
+              variant="secondary"
+              className={`${getCategoryColor(campaign.category)} text-xs font-medium border`}
+            >
+              {campaign.category}
+            </Badge>
+          </div>
+          {/* Time Badge */}
+          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+            <Clock className="w-3 h-3 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground font-medium">
+              {daysAgo === 0 ? 'Today' : `${daysAgo}d ago`}
+            </span>
+          </div>
+        </div>
 
+        {/* Content */}
+        <div className="p-6">
           {/* Title */}
-          <h3 className="font-semibold text-white text-sm mb-3 line-clamp-2 leading-tight group-hover:text-blue-300 transition-colors">
+          <h3 className="font-semibold text-foreground text-lg mb-2 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
             {campaign.title}
           </h3>
+
+          {/* Description */}
+          <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed">
+            {campaign.description}
+          </p>
+
+          {/* Location */}
+          {campaign.location && (
+            <div className="flex items-center space-x-1 mb-4">
+              <MapPin className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{campaign.location}</span>
+            </div>
+          )}
 
           {/* Progress */}
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-white">
-                ${campaign.raised.toLocaleString()}
+              <span className="text-lg font-bold text-foreground">
+                {formatCurrency(campaign.raised)}
               </span>
-              <span className="text-xs text-gray-400">
-                of ${campaign.goal.toLocaleString()}
+              <span className="text-sm text-muted-foreground">
+                of {formatCurrency(campaign.goal)}
               </span>
             </div>
-            <div className="relative">
-              <div className="w-full bg-gray-800 rounded-full h-2">
-                <div
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500 relative overflow-hidden"
-                  style={{ width: `${progressPercentage}%` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
-                </div>
-              </div>
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-sm font-medium text-success">
+                {progressPercentage.toFixed(0)}% funded
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {Math.max(0, Math.ceil((campaign.goal - campaign.raised) / (campaign.raised / Math.max(1, daysAgo))))} days left
+              </span>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center space-x-3 text-gray-400">
-              <div>
-                {campaign.contributors} supporters
-              </div>
-              {campaign.location && (
-                <div>
-                  {campaign.location.split(',')[0]}
-                </div>
-              )}
+          <div className="flex items-center justify-between pt-4 border-t border-border">
+            <div className="flex items-center space-x-1">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                {campaign.contributors} supporter{campaign.contributors !== 1 ? 's' : ''}
+              </span>
             </div>
-            <div className="text-blue-400 font-medium">
-              {progressPercentage.toFixed(0)}%
+            <div className="flex items-center space-x-1">
+              <Heart className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Support</span>
             </div>
           </div>
         </div>

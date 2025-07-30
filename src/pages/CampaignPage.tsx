@@ -1,4 +1,4 @@
-// Dynamic Campaign Page - Shows individual campaigns
+// Professional Campaign Page - GoFundMe-inspired Design
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { CampaignHeader } from '@/components/CampaignHeader';
@@ -7,8 +7,22 @@ import { ContributeButton } from '@/components/ContributeButton';
 import { ContributorsList } from '@/components/ContributorsList';
 import { StatsCards } from '@/components/StatsCards';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Share2, Copy } from 'lucide-react';
+import {
+  ArrowLeft,
+  Share2,
+  Copy,
+  Heart,
+  MapPin,
+  Calendar,
+  Users,
+  Shield,
+  Flag,
+  TrendingUp,
+  Clock,
+  CheckCircle
+} from 'lucide-react';
 import { BASE_PAY_CONFIG } from '@/config/basePay';
 
 interface Campaign {
@@ -159,10 +173,10 @@ export function CampaignPage() {
 
   if (loading) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading campaign...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-transparent mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading campaign...</p>
           </div>
         </div>
     );
@@ -170,12 +184,15 @@ export function CampaignPage() {
 
   if (!campaign) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Campaign Not Found</h1>
-            <p className="text-gray-600 mb-6">The campaign you're looking for doesn't exist.</p>
+            <div className="w-24 h-24 bg-destructive-light rounded-full flex items-center justify-center mx-auto mb-6">
+              <Flag className="w-12 h-12 text-destructive" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground mb-4">Campaign Not Found</h1>
+            <p className="text-muted-foreground mb-6">The campaign you're looking for doesn't exist or has been removed.</p>
             <Link to="/">
-              <Button>
+              <Button size="lg" className="bg-gray-900 hover:bg-gray-800 text-white">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Home
               </Button>
@@ -186,86 +203,231 @@ export function CampaignPage() {
   }
 
   const progressPercentage = Math.min((campaign.raised / campaign.goal) * 100, 100);
+  const daysAgo = Math.floor((Date.now() - new Date(campaign.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      education: 'bg-gray-100 text-gray-700 border-gray-200',
+      health: 'bg-red-100 text-red-700 border-red-200',
+      community: 'bg-green-100 text-green-700 border-green-200',
+      environment: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+      technology: 'bg-purple-100 text-purple-700 border-purple-200',
+      arts: 'bg-pink-100 text-pink-700 border-pink-200',
+      emergency: 'bg-orange-100 text-orange-700 border-orange-200',
+      other: 'bg-gray-100 text-gray-700 border-gray-200'
+    };
+    return colors[category as keyof typeof colors] || colors.other;
+  };
 
   return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 py-3">
+      <div className="min-h-screen bg-background">
+        {/* Professional Header */}
+        <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
-              <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+              <Link to="/" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200">
                 <ArrowLeft className="h-5 w-5" />
-                <span className="text-sm font-medium">Back</span>
+                <span className="font-medium">Back to Campaigns</span>
               </Link>
 
-              <Button
-                  onClick={handleShare}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center space-x-1"
-              >
-                <Share2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Share</span>
-              </Button>
+              <div className="flex items-center space-x-3">
+                <Button
+                    onClick={handleShare}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center space-x-2"
+                >
+                  <Share2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Share Campaign</span>
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center space-x-2 text-muted-foreground"
+                >
+                  <Flag className="h-4 w-4" />
+                  <span className="hidden sm:inline">Report</span>
+                </Button>
+              </div>
             </div>
           </div>
         </header>
 
         {/* Main Content */}
-        <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-          <div>
-            {/* Campaign Info Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <div className="mb-4">
-                <h1 className="text-xl font-bold text-gray-900 mb-2">{campaign.title}</h1>
-                <p className="text-gray-600 text-sm leading-relaxed">{campaign.description}</p>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Campaign Details */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Campaign Hero */}
+              <div className="card-elevated bg-white p-8">
+                {/* Category and Status */}
+                <div className="flex items-center justify-between mb-6">
+                  <Badge
+                    variant="secondary"
+                    className={`${getCategoryColor(campaign.category)} text-sm font-medium border`}
+                  >
+                    {campaign.category}
+                  </Badge>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-success" />
+                    <span className="text-sm text-success font-medium">Verified Campaign</span>
+                  </div>
+                </div>
+
+                {/* Title and Description */}
+                <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-4 leading-tight">
+                  {campaign.title}
+                </h1>
+
+                <div className="flex items-center space-x-6 text-muted-foreground mb-6">
+                  {campaign.location && (
+                    <div className="flex items-center space-x-1">
+                      <MapPin className="w-4 h-4" />
+                      <span className="text-sm">{campaign.location}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center space-x-1">
+                    <Calendar className="w-4 h-4" />
+                    <span className="text-sm">
+                      Created {daysAgo === 0 ? 'today' : `${daysAgo} days ago`}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Users className="w-4 h-4" />
+                    <span className="text-sm">{campaign.beneficiaries} beneficiaries</span>
+                  </div>
+                </div>
+
+                <p className="text-muted-foreground text-lg leading-relaxed">
+                  {campaign.description}
+                </p>
               </div>
 
-              {/* Progress */}
-              <CampaignProgress
-                  raised={campaign.raised}
-                  goal={campaign.goal}
-              />
+              {/* Campaign Story Section */}
+              <div className="card-elevated bg-white p-8">
+                <h2 className="text-2xl font-bold text-foreground mb-6">Campaign Story</h2>
+                <div className="prose prose-lg max-w-none">
+                  <p className="text-muted-foreground leading-relaxed">
+                    This campaign aims to make a meaningful difference in the community.
+                    Every contribution, no matter the size, helps us get closer to our goal
+                    and creates lasting positive impact.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed mt-4">
+                    Your support means everything to us and to those who will benefit from this campaign.
+                    Together, we can achieve something truly remarkable.
+                  </p>
+                </div>
+              </div>
+
+              {/* Trust & Safety */}
+              <div className="card-elevated bg-white p-8">
+                <h3 className="text-xl font-bold text-foreground mb-4">Trust & Safety</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-success-light rounded-full flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-success" />
+                    </div>
+                    <div>
+                      <div className="font-medium text-foreground">Verified Campaign</div>
+                      <div className="text-sm text-muted-foreground">Identity confirmed</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-5 h-5 text-gray-600" />
+                    </div>
+                    <div>
+                      <div className="font-medium text-foreground">Secure Payments</div>
+                      <div className="text-sm text-muted-foreground">Blockchain protected</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contributors */}
+              {contributors.length > 0 && (
+                <div className="card-elevated bg-white p-8">
+                  <h3 className="text-xl font-bold text-foreground mb-6">Recent Supporters</h3>
+                  <ContributorsList contributors={contributors} />
+                </div>
+              )}
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-white rounded-lg p-4 text-center border border-gray-100">
-                <div className="text-lg font-bold text-gray-900">${campaign.raised}</div>
-                <div className="text-xs text-gray-500">Raised</div>
-              </div>
-              <div className="bg-white rounded-lg p-4 text-center border border-gray-100">
-                <div className="text-lg font-bold text-gray-900">{campaign.contributors}</div>
-                <div className="text-xs text-gray-500">Supporters</div>
-              </div>
-              <div className="bg-white rounded-lg p-4 text-center border border-gray-100">
-                <div className="text-lg font-bold text-gray-900">{progressPercentage.toFixed(0)}%</div>
-                <div className="text-xs text-gray-500">Funded</div>
+            {/* Right Column - Donation Panel */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 space-y-6">
+                {/* Progress Card */}
+                <div className="card-elevated bg-white p-6">
+                  <div className="text-center mb-6">
+                    <div className="text-3xl font-bold text-foreground mb-1">
+                      {formatCurrency(campaign.raised)}
+                    </div>
+                    <div className="text-muted-foreground">
+                      raised of {formatCurrency(campaign.goal)} goal
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="progress-bar mb-4">
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${progressPercentage}%` }}
+                    />
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-foreground">{campaign.contributors}</div>
+                      <div className="text-sm text-muted-foreground">supporters</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-success">{progressPercentage.toFixed(0)}%</div>
+                      <div className="text-sm text-muted-foreground">funded</div>
+                    </div>
+                  </div>
+
+                  {/* Contribution Button */}
+                  <ContributeButton
+                      onContribute={handleContribute}
+                      className="w-full text-lg py-4"
+                      recipientAddress={campaign.recipientAddress}
+                      testnet={BASE_PAY_CONFIG.TESTNET}
+                  />
+
+                  <div className="text-center mt-4">
+                    <p className="text-sm text-muted-foreground">
+                      Secure donation powered by Base blockchain
+                    </p>
+                  </div>
+                </div>
+
+                {/* Share Card */}
+                <div className="card-elevated bg-white p-6">
+                  <h3 className="font-bold text-foreground mb-4">Share this campaign</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Help spread the word and reach more supporters
+                  </p>
+                  <Button
+                    onClick={handleShare}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share Campaign
+                  </Button>
+                </div>
               </div>
             </div>
-
-            {/* Contribution Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Support This Campaign
-              </h3>
-              <p className="text-gray-600 text-sm mb-6">
-                Join {campaign.contributors} supporters making a difference
-              </p>
-
-              <ContributeButton
-                  amount={0.1}
-                  onContribute={handleContribute}
-                  className="w-full"
-                  recipientAddress={campaign.recipientAddress}
-                  testnet={BASE_PAY_CONFIG.TESTNET}
-              />
-            </div>
-
-            {/* Contributors */}
-            {contributors.length > 0 && (
-                <ContributorsList contributors={contributors} />
-            )}
           </div>
         </main>
       </div>
