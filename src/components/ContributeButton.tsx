@@ -144,8 +144,8 @@ export function ContributeButton({
           recipientAddress={recipientAddress}
           testnet={testnet}
           onSuccess={async (result) => {
-            // Validate transaction hash format
-            if (!isValidTransactionHash(result.transactionHash)) {
+            // For testnet, be more lenient with transaction hash validation
+            if (!testnet && !isValidTransactionHash(result.transactionHash)) {
               console.error('❌ Invalid transaction hash:', result.transactionHash);
               setStatus('❌ Invalid transaction - contribution not recorded');
               toast({
@@ -157,26 +157,51 @@ export function ContributeButton({
               return;
             }
 
-            setStatus('🔍 Verifying transaction on blockchain...');
+            // For testnet, accept payments even without proper transaction hash
+            if (testnet && !result.transactionHash) {
+              console.log('⚠️ Testnet payment without transaction hash, proceeding anyway');
+              result.transactionHash = `testnet_${result.id}_${Date.now()}`;
+            }
 
-            try {
-              // Verify the transaction on Base blockchain
-              const verification = await verifyUSDCTransaction(
-                result.transactionHash,
-                recipientAddress,
-                getCurrentAmount()
-              );
+            // Skip blockchain verification for testnet transactions
+            if (testnet) {
+              setStatus('✅ Testnet payment accepted, recording contribution...');
+            } else {
+              setStatus('🔍 Verifying transaction on blockchain...');
 
-              if (!verification.isValid) {
-                console.error('❌ Transaction verification failed:', verification.error);
-                setStatus('❌ Transaction verification failed');
+              try {
+                // Verify the transaction on Base blockchain (mainnet only)
+                const verification = await verifyUSDCTransaction(
+                  result.transactionHash,
+                  recipientAddress,
+                  getCurrentAmount()
+                );
+
+                if (!verification.isValid) {
+                  console.error('❌ Transaction verification failed:', verification.error);
+                  setStatus('❌ Transaction verification failed');
+                  toast({
+                    title: "❌ Transaction Verification Failed",
+                    description: verification.error || "Transaction could not be verified on blockchain",
+                    variant: "destructive",
+                    duration: 7000,
+                  });
+                  return;
+                }
+              } catch (verificationError) {
+                console.error('❌ Verification error:', verificationError);
+                setStatus('❌ Verification failed');
                 toast({
-                  title: "❌ Transaction Verification Failed",
-                  description: verification.error || "Transaction could not be verified on blockchain",
+                  title: "❌ Verification Error",
+                  description: "Could not verify transaction. Please try again.",
                   variant: "destructive",
-                  duration: 7000,
+                  duration: 5000,
                 });
                 return;
+              }
+            }
+
+            try {
               }
 
               console.log('✅ Transaction verified on blockchain:', verification);
@@ -235,21 +260,6 @@ export function ContributeButton({
           <p className="text-sm text-center font-medium mt-4">
             {status}
           </p>
-        )}
-
-        {/* Debug Info (Development Only) */}
-        {import.meta.env.DEV && (
-          <div className="text-xs bg-blue-50 p-2 rounded border">
-            <strong>Debug Info:</strong><br/>
-            Network: {testnet ? 'Base Sepolia (Testnet)' : 'Base Mainnet'}<br/>
-            Recipient: {recipientAddress}<br/>
-            Amount: ${getCurrentAmount().toFixed(2)} USDC<br/>
-            {testnet && (
-              <span className="text-blue-600">
-                Get test USDC: <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer" className="underline">Circle Faucet</a>
-              </span>
-            )}
-          </div>
         )}
 
         {/* Security Note */}
