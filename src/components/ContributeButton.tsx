@@ -137,17 +137,6 @@ export function ContributeButton({
           )}
         </div>
 
-        {/* Debug Test Button */}
-        <Button
-          onClick={() => {
-            console.log('🧪 DEBUG: Test button clicked!');
-            alert('Debug test button works!');
-          }}
-          className="w-full mb-4 bg-purple-600 hover:bg-purple-700"
-        >
-          🧪 DEBUG: Click Test
-        </Button>
-
         {/* Real Base Pay Button */}
         <RealBasePayButton
           amount={getCurrentAmount().toFixed(2)}

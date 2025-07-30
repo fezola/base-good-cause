@@ -239,9 +239,9 @@ const DevStatus = () => {
 
               {/* Real Base Pay Button */}
               <div>
-                <h4 className="font-medium mb-2">🎯 REAL Base Pay Button (Wallet Popup):</h4>
+                <h4 className="font-medium mb-2">🎯 BasePay Button (Clean Design):</h4>
                 <RealBasePayButton
-                  amount="5.00"
+                  amount="10.00"
                   recipientAddress="0x742d35Cc6634C0532925a3b8D4C9db96C4b5Da5e"
                   onSuccess={(result) => {
                     toast({

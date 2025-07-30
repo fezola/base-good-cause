@@ -12,34 +12,24 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
 
   const handlePayment = async () => {
     setIsLoading(true);
-    console.log('🚀 Starting Base Pay transaction...');
 
     try {
       // Method 1: Try to use existing Base Account SDK
       try {
-        console.log('📱 Attempting Base Account SDK...');
-
         const { createBaseAccountSDK } = await import('@base-org/account');
 
         const sdk = createBaseAccountSDK({
           appName: 'BaseFunded',
-          appLogo: '/logo.png',
+          appLogo: '/basepay.JPG',
           enableAnalytics: false,
         });
 
-        console.log('✅ Base Account SDK created');
-
-        // Try to get provider and request payment
         const provider = sdk.getProvider();
 
-        // Request account connection
         const accounts = await provider.request({
           method: 'eth_requestAccounts'
         });
 
-        console.log('✅ Accounts connected:', accounts);
-
-        // This should trigger the Base Pay flow
         const { pay } = await import('@base-org/account');
 
         const result = await pay({
@@ -48,8 +38,6 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
           token: 'USDC',
           testnet: false
         });
-
-        console.log('✅ Base Pay successful:', result);
 
         onSuccess?.({
           success: true,
@@ -61,18 +49,15 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
         return;
 
       } catch (baseSDKError) {
-        console.warn('❌ Base Account SDK failed:', baseSDKError);
+        // Continue to fallback method
       }
 
       // Method 2: Try direct wallet connection
       try {
-        console.log('🔗 Attempting direct wallet connection...');
-        
         if (!window.ethereum) {
           throw new Error('No wallet detected. Please install MetaMask or Coinbase Wallet.');
         }
 
-        // Request account access
         const accounts = await window.ethereum.request({
           method: 'eth_requestAccounts'
         });
@@ -80,8 +65,6 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
         if (accounts.length === 0) {
           throw new Error('No accounts found. Please connect your wallet.');
         }
-
-        console.log('✅ Wallet connected:', accounts[0]);
 
         // Switch to Base network
         try {
@@ -124,8 +107,6 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
           }],
         });
 
-        console.log('✅ Transaction sent:', txHash);
-
         onSuccess?.({
           success: true,
           id: txHash,
@@ -136,12 +117,10 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
         return;
 
       } catch (walletError) {
-        console.warn('❌ Direct wallet failed:', walletError);
         throw walletError;
       }
 
     } catch (error) {
-      console.error('❌ All payment methods failed:', error);
       onError?.(error);
     } finally {
       setIsLoading(false);
@@ -154,7 +133,7 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
       <button
         onClick={handlePayment}
         disabled={isLoading}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
+        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:bg-gray-400 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center space-x-3 shadow-lg"
       >
         {isLoading ? (
           <>
@@ -163,25 +142,17 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
           </>
         ) : (
           <>
-            <span>💳</span>
-            <span>Pay ${amount} USDC with Base</span>
+            <img
+              src="/basepay.JPG"
+              alt="BasePay"
+              className="h-6 w-6 object-contain"
+            />
+            <span>BasePay</span>
           </>
         )}
       </button>
 
-      {/* Info */}
-      <div className="text-xs text-gray-600 space-y-1">
-        <p>• This will open your Coinbase Wallet or MetaMask</p>
-        <p>• You'll be prompted to connect and approve the transaction</p>
-        <p>• Make sure you're on the Base network</p>
-      </div>
 
-      {/* Debug info */}
-      <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-        <p>To: {recipientAddress.slice(0, 6)}...{recipientAddress.slice(-4)}</p>
-        <p>Amount: {amount} USDC</p>
-        <p>Network: Base Mainnet</p>
-      </div>
     </div>
   );
 }
