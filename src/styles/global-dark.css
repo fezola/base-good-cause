@@ -4,6 +4,8 @@
 body, html, #root {
   background: #000000 !important;
   color: #ffffff !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important; /* Dynamic viewport height for mobile */
 }
 
 /* Override all white backgrounds */
@@ -193,16 +195,42 @@ span, div, p, a, label {
   body, html, #root {
     background: #000000 !important;
     background-color: #000000 !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    height: 100% !important;
   }
-  
+
+  /* Fix mobile viewport issues */
+  html {
+    height: -webkit-fill-available !important;
+  }
+
+  body {
+    min-height: -webkit-fill-available !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+  }
+
+  #root {
+    min-height: -webkit-fill-available !important;
+    position: relative !important;
+  }
+
   /* Remove any blue backgrounds on mobile */
   * {
     background-color: inherit !important;
   }
-  
+
   /* Ensure containers stay dark on mobile */
   div, main, section, article {
     background: transparent !important;
     background-color: transparent !important;
+  }
+
+  /* Fix mobile browser chrome */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      min-height: -webkit-fill-available !important;
+    }
   }
 }
