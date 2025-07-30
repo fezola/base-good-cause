@@ -6,6 +6,9 @@ body, html, #root {
   color: #ffffff !important;
   min-height: 100vh !important;
   min-height: 100dvh !important; /* Dynamic viewport height for mobile */
+  overscroll-behavior: none !important; /* Prevent overscroll bounce */
+  overscroll-behavior-y: none !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 /* Override all white backgrounds */
@@ -198,17 +201,25 @@ span, div, p, a, label {
     min-height: 100vh !important;
     min-height: 100dvh !important;
     height: 100% !important;
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    overscroll-behavior-x: none !important;
   }
 
   /* Fix mobile viewport issues */
   html {
     height: -webkit-fill-available !important;
+    background: #000000 !important;
+    overscroll-behavior: none !important;
   }
 
   body {
     min-height: -webkit-fill-available !important;
     position: relative !important;
     overflow-x: hidden !important;
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    background: #000000 !important;
   }
 
   #root {
@@ -231,6 +242,25 @@ span, div, p, a, label {
   @supports (-webkit-touch-callout: none) {
     body {
       min-height: -webkit-fill-available !important;
+      background: #000000 !important;
+      overscroll-behavior: none !important;
     }
+  }
+
+  /* Prevent blue overscroll glow on iOS */
+  * {
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: none !important;
+  }
+
+  /* Remove any blue glow effects */
+  *::-webkit-scrollbar {
+    background: #000000 !important;
+  }
+
+  /* Prevent pull-to-refresh blue background */
+  html, body {
+    overscroll-behavior-y: contain !important;
+    background-attachment: fixed !important;
   }
 }
