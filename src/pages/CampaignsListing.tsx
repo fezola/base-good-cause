@@ -52,14 +52,7 @@ export function CampaignsListing() {
       setCampaigns(supabaseCampaigns);
     } catch (error) {
       console.error('Failed to load campaigns from Supabase:', error);
-      // Fallback to localStorage for now
-      try {
-        const savedCampaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
-        setCampaigns(savedCampaigns);
-      } catch (localError) {
-        console.error('Failed to load campaigns from localStorage:', localError);
-        setCampaigns([]);
-      }
+      setCampaigns([]);
     } finally {
       setLoading(false);
     }

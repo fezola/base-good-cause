@@ -2,10 +2,29 @@
 import { IntegrationStatus } from "@/components/IntegrationStatus";
 import { TestBasePay } from "@/components/TestBasePay";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { clearAllBrowserData } from "@/utils/clearMockData";
+import { toast } from "@/hooks/use-toast";
 
 const DevStatus = () => {
+  const handleClearMockData = () => {
+    const success = clearAllBrowserData();
+    if (success) {
+      toast({
+        title: "🗑️ Mock Data Cleared",
+        description: "All mock campaigns and test data have been removed. You can now create real campaigns!",
+        duration: 5000
+      });
+    } else {
+      toast({
+        title: "❌ Clear Failed",
+        description: "Failed to clear some mock data. Check console for details.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -31,6 +50,25 @@ const DevStatus = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-8">
+          {/* Clear Mock Data */}
+          <div className="bg-card rounded-lg p-6 shadow-elevation">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+              <Trash2 className="w-5 h-5 mr-2" />
+              Clear Mock Data
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              Remove all mock campaigns, test data, and cached information to start fresh with real campaigns.
+            </p>
+            <Button
+              onClick={handleClearMockData}
+              variant="destructive"
+              className="flex items-center space-x-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Clear All Mock Data</span>
+            </Button>
+          </div>
+
           {/* Base Pay Test */}
           <TestBasePay />
 

@@ -70,20 +70,6 @@ export function CampaignPage() {
 
     } catch (error) {
       console.error('Failed to load campaign from Supabase:', error);
-      // Fallback to localStorage
-      try {
-        const campaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
-        const foundCampaign = campaigns.find((c: any) => c.id === campaignId);
-
-        if (foundCampaign) {
-          setCampaign(foundCampaign);
-          const allContributors = JSON.parse(localStorage.getItem('basefunded_contributors') || '[]');
-          const campaignContributors = allContributors.filter((c: any) => c.campaignId === campaignId);
-          setContributors(campaignContributors);
-        }
-      } catch (localError) {
-        console.error('Failed to load campaign from localStorage:', localError);
-      }
     } finally {
       setLoading(false);
     }

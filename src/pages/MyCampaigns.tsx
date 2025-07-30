@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ModernHeader } from '@/components/ModernHeader';
+import { campaignService } from '@/services/campaignService';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Plus,
   Eye,
@@ -34,33 +36,22 @@ interface Campaign {
 }
 
 export function MyCampaigns() {
+  const { user } = useAuth();
   const [myCampaigns, setMyCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Get or create a creator ID for this browser
-  const getCreatorId = () => {
-    let creatorId = localStorage.getItem('basefunded_creator_id');
-    if (!creatorId) {
-      creatorId = `creator_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('basefunded_creator_id', creatorId);
-    }
-    return creatorId;
-  };
-
   useEffect(() => {
-    loadMyCampaigns();
-  }, []);
+    if (user) {
+      loadMyCampaigns();
+    }
+  }, [user]);
 
-  const loadMyCampaigns = () => {
+  const loadMyCampaigns = async () => {
     try {
-      const creatorId = getCreatorId();
-      const allCampaigns = JSON.parse(localStorage.getItem('basefunded_campaigns') || '[]');
-      
-      // Filter campaigns created by this user
-      const userCampaigns = allCampaigns.filter((campaign: Campaign) => 
-        campaign.creatorId === creatorId
-      );
-      
+      if (!user) return;
+
+      // Load campaigns created by the current user from Supabase
+      const userCampaigns = await campaignService.getUserCampaigns(user.id);
       setMyCampaigns(userCampaigns);
     } catch (error) {
       console.error('Failed to load campaigns:', error);
