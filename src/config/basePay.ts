@@ -119,7 +119,7 @@ export const validateConfig = () => {
     errors.push('Platform name is required');
   }
 
-  if (!isValidAmount(BASE_PAY_CONFIG.CONTRIBUTION_AMOUNT)) {
+  if (!isValidAmount(BASE_PAY_CONFIG.DEFAULT_CONTRIBUTION_AMOUNT)) {
     errors.push('Invalid default contribution amount');
   }
 

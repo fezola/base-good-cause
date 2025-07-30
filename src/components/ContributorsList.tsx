@@ -6,10 +6,8 @@ interface Contributor {
   id: string;
   campaignId?: string;
   address?: string;
-  wallet_address?: string;
   amount: number;
-  timestamp?: string | Date;
-  created_at?: string | Date;
+  timestamp: string | Date;
   ensName?: string;
   transactionHash?: string;
   blockNumber?: number;
