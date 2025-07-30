@@ -3,7 +3,7 @@
  */
 
 const BASE_RPC_URL = 'https://mainnet.base.org';
-const USDC_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+const USDC_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // USDC on Base mainnet
 
 export interface TransactionVerification {
   isValid: boolean;

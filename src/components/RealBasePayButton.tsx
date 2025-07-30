@@ -66,46 +66,47 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
           throw new Error('No accounts found. Please connect your wallet.');
         }
 
-        // Switch to Base Sepolia testnet for testing
+        // Switch to Base mainnet
         try {
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x14A34' }], // Base Sepolia testnet
+            params: [{ chainId: '0x2105' }], // Base mainnet
           });
         } catch (switchError) {
-          // If Base Sepolia is not added, add it
+          // If Base network is not added, add it
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: '0x14A34',
-              chainName: 'Base Sepolia',
+              chainId: '0x2105',
+              chainName: 'Base',
               nativeCurrency: {
                 name: 'Ethereum',
                 symbol: 'ETH',
                 decimals: 18,
               },
-              rpcUrls: ['https://sepolia.base.org'],
-              blockExplorerUrls: ['https://sepolia.basescan.org'],
+              rpcUrls: ['https://mainnet.base.org'],
+              blockExplorerUrls: ['https://basescan.org'],
             }],
           });
         }
 
-        // Create transaction for USDC transfer on testnet
-        const usdcContract = '0x036CbD53842c5426634e7929541eC2318f3dCF7e'; // USDC on Base Sepolia
+        // REAL USDC transfer on Base mainnet
+        const usdcContract = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // USDC on Base mainnet
         const amountInWei = Math.floor(parseFloat(amount) * 1000000); // USDC has 6 decimals
 
-        // For testing, let's just send a simple ETH transaction instead of USDC
-        // This is easier and doesn't require USDC balance
-        const ethAmount = (parseFloat(amount) * 0.001).toString(); // Convert to small ETH amount for testing
-        const ethAmountWei = '0x' + Math.floor(parseFloat(ethAmount) * 1e18).toString(16);
+        // Proper ERC20 transfer function signature
+        const recipientPadded = recipientAddress.slice(2).padStart(64, '0');
+        const amountPadded = amountInWei.toString(16).padStart(64, '0');
+        const transferData = `0xa9059cbb${recipientPadded}${amountPadded}`;
 
         const txHash = await window.ethereum.request({
           method: 'eth_sendTransaction',
           params: [{
             from: accounts[0],
-            to: recipientAddress, // Send directly to recipient
-            value: ethAmountWei, // Small ETH amount for testing
-            gas: '0x5208', // 21000 gas for simple transfer
+            to: usdcContract,
+            data: transferData,
+            value: '0x0',
+            gas: '0x15F90', // 90000 gas limit for ERC20 transfer
           }],
         });
 
@@ -164,7 +165,7 @@ export function RealBasePayButton({ amount, recipientAddress, onSuccess, onError
               alt="BasePay"
               className="h-6 w-6 object-contain"
             />
-            <span>BasePay (Testnet)</span>
+            <span>BasePay</span>
           </>
         )}
       </button>
