@@ -232,30 +232,33 @@ export function CampaignPage() {
       <div className="min-h-screen bg-background">
         {/* Professional Header */}
         <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
             <div className="flex items-center justify-between">
               <Link to="/" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200">
-                <ArrowLeft className="h-5 w-5" />
-                <span className="font-medium">Back to Campaigns</span>
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="font-medium text-sm sm:text-base">
+                  <span className="hidden sm:inline">Back to Campaigns</span>
+                  <span className="sm:hidden">Back</span>
+                </span>
               </Link>
 
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 sm:space-x-3">
                 <Button
                     onClick={handleShare}
                     variant="outline"
                     size="sm"
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3"
                 >
-                  <Share2 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Share Campaign</span>
+                  <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline text-xs sm:text-sm">Share Campaign</span>
                 </Button>
                 <Button
                     variant="outline"
                     size="sm"
-                    className="flex items-center space-x-2 text-muted-foreground"
+                    className="flex items-center space-x-1 sm:space-x-2 text-muted-foreground px-2 sm:px-3"
                 >
-                  <Flag className="h-4 w-4" />
-                  <span className="hidden sm:inline">Report</span>
+                  <Flag className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline text-xs sm:text-sm">Report</span>
                 </Button>
               </div>
             </div>
@@ -263,28 +266,28 @@ export function CampaignPage() {
         </header>
 
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {/* Left Column - Campaign Details */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
               {/* Campaign Hero */}
-              <div className="card-elevated bg-white p-8">
+              <div className="card-elevated bg-white p-4 sm:p-6 lg:p-8">
                 {/* Category and Status */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
                   <Badge
                     variant="secondary"
-                    className={`${getCategoryColor(campaign.category)} text-sm font-medium border`}
+                    className={`${getCategoryColor(campaign.category)} text-xs sm:text-sm font-medium border w-fit`}
                   >
                     {campaign.category}
                   </Badge>
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-success" />
-                    <span className="text-sm text-success font-medium">Verified Campaign</span>
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-success" />
+                    <span className="text-xs sm:text-sm text-success font-medium">Verified Campaign</span>
                   </div>
                 </div>
 
                 {/* Title and Description */}
-                <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-4 leading-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4 leading-tight">
                   {campaign.title}
                 </h1>
 

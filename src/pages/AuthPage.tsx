@@ -119,7 +119,7 @@ export function AuthPage() {
       <div className="flex-1 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">BaseFund</CardTitle>
+            <CardTitle className="text-2xl font-bold">FundMe</CardTitle>
             <CardDescription>
               Sign in to create and manage your campaigns
             </CardDescription>
@@ -323,7 +323,7 @@ export function AuthPage() {
           <span className="font-medium">Base</span>
         </div>
         <p className="text-xs text-muted-foreground">
-          © 2024 BaseFund. All rights reserved.
+          © 2025 FundMe. All rights reserved.
         </p>
       </footer>
     </div>

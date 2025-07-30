@@ -129,7 +129,7 @@ export function CampaignsListing() {
         <ModernHeader onSearch={handleSearch} />
 
         {/* Hero Section */}
-        <section className="relative bg-gray-900 text-white py-20 lg:py-32 overflow-hidden">
+        <section className="relative bg-gray-900 text-white py-12 sm:py-16 lg:py-32 overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
@@ -138,30 +138,30 @@ export function CampaignsListing() {
           </div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="mb-8">
-              <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                <Heart className="w-4 h-4" fill="currentColor" />
-                <span className="text-sm font-medium">Trusted by thousands of supporters</span>
+            <div className="mb-6 sm:mb-8">
+              <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-2 mb-4 sm:mb-6">
+                <Heart className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" />
+                <span className="text-xs sm:text-sm font-medium">Trusted by thousands of supporters</span>
               </div>
             </div>
 
-            <h1 className="text-5xl lg:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-tight px-2">
               Fund What
               <span className="block text-white">
                 Matters Most
               </span>
             </h1>
 
-            <p className="text-xl lg:text-2xl text-gray-200 mb-10 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-200 mb-8 sm:mb-10 max-w-4xl mx-auto leading-relaxed px-4">
               Join a community of changemakers. Discover meaningful campaigns, support causes you care about,
               and help make a lasting difference in communities around the world.
             </p>
 
-            <div className="flex justify-center mb-12">
+            <div className="flex justify-center mb-8 sm:mb-12 px-4">
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-white text-white hover:bg-white hover:text-gray-900 font-semibold px-8 py-4 text-lg backdrop-blur-sm"
+                className="border-2 border-white text-white hover:bg-white hover:text-gray-900 font-semibold px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-lg backdrop-blur-sm w-full sm:w-auto max-w-xs sm:max-w-none"
               >
                 Learn How It Works
               </Button>
@@ -217,14 +217,14 @@ export function CampaignsListing() {
         {/* Category Filter */}
         <div className="bg-white border-b border-border sticky top-16 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                 <div className="flex items-center space-x-2">
                   <Filter className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium text-foreground">Filter by category:</span>
                 </div>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="w-full sm:w-48">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -237,7 +237,7 @@ export function CampaignsListing() {
                 </Select>
               </div>
 
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground text-center sm:text-right">
                 {filteredCampaigns.length} campaign{filteredCampaigns.length !== 1 ? 's' : ''} found
               </div>
             </div>
@@ -264,12 +264,12 @@ export function CampaignsListing() {
           ) : (
               <>
                 {/* Results Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
                   <div>
-                    <h2 className="text-2xl font-bold text-foreground">
+                    <h2 className="text-xl sm:text-2xl font-bold text-foreground">
                       {selectedCategory === 'all' ? 'All Campaigns' : categories.find(c => c.value === selectedCategory)?.label}
                     </h2>
-                    <p className="text-muted-foreground mt-1">
+                    <p className="text-muted-foreground mt-1 text-sm sm:text-base">
                       {filteredCampaigns.length} campaign{filteredCampaigns.length !== 1 ? 's' : ''} found
                     </p>
                   </div>

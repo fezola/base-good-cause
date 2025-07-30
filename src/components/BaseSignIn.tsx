@@ -31,7 +31,7 @@ export function BaseSignIn({ onSignIn, className }: BaseSignInProps) {
 
   // Create Base Account SDK
   const sdk = createBaseAccountSDK({
-    appName: 'BaseFunded',
+    appName: 'FundMe',
     appLogo: 'https://base.org/favicon.ico' // You can replace with your logo
   });
 

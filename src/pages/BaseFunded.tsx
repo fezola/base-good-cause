@@ -137,10 +137,7 @@ const BaseFunded = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">B</span>
-              </div>
-              <h1 className="text-xl font-bold text-foreground">BaseFunded</h1>
+              <h1 className="text-xl font-bold text-foreground">FundMe</h1>
             </div>
             <div className="text-sm text-muted-foreground">
               Powered by Base Pay
@@ -241,7 +238,7 @@ const BaseFunded = () => {
       <footer className="border-t bg-muted/30 mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-sm text-muted-foreground space-y-2">
-            <p>Built on Base Chain • Powered by Base Pay • BaseFunded © 2024</p>
+            <p>Built on Base Chain • Powered by Base Pay • FundMe © 2025</p>
             <p>Submission for Base Builder Quest 8</p>
 
             {/* Development Status Link */}

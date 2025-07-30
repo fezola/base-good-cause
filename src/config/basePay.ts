@@ -7,7 +7,7 @@ export const BASE_PAY_CONFIG = {
   ENVIRONMENT: import.meta.env.VITE_ENVIRONMENT || 'development',
   
   // Platform Configuration
-  PLATFORM_NAME: import.meta.env.VITE_PLATFORM_NAME || 'BaseFunded',
+  PLATFORM_NAME: import.meta.env.VITE_PLATFORM_NAME || 'FundMe',
   PLATFORM_DESCRIPTION: import.meta.env.VITE_PLATFORM_DESCRIPTION || 'Decentralized Crowdfunding Platform',
 
   // Contribution Configuration

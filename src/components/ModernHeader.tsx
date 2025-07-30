@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { Search, Heart, Menu, X, User, LogOut } from 'lucide-react';
+import { Search, Menu, X, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
@@ -36,12 +36,9 @@ export function ModernHeader({ onSearch, showSearch = true }: ModernHeaderProps)
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
-            <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white" fill="currentColor" />
-            </div>
-            <span className="font-bold text-2xl text-foreground">
-              BaseFund
+          <Link to="/" className="flex items-center flex-shrink-0">
+            <span className="font-bold text-xl sm:text-2xl text-foreground">
+              FundMe
             </span>
           </Link>
 
@@ -80,16 +77,17 @@ export function ModernHeader({ onSearch, showSearch = true }: ModernHeaderProps)
           )}
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {user ? (
               <>
                 {/* Create Campaign Button */}
                 <Link to="/create">
                   <Button
                     size="sm"
-                    className="bg-gray-900 hover:bg-gray-800 text-white hidden sm:inline-flex"
+                    className="bg-gray-900 hover:bg-gray-800 text-white hidden sm:inline-flex text-xs sm:text-sm px-2 sm:px-4"
                   >
-                    Start Campaign
+                    <span className="hidden sm:inline">Start Campaign</span>
+                    <span className="sm:hidden">Start</span>
                   </Button>
                 </Link>
 
@@ -116,12 +114,12 @@ export function ModernHeader({ onSearch, showSearch = true }: ModernHeaderProps)
             ) : (
               <>
                 <Link to="/auth">
-                  <Button size="sm" style={{ backgroundColor: '#0000FF', color: 'white' }}>
+                  <Button size="sm" style={{ backgroundColor: '#0000FF', color: 'white' }} className="text-xs sm:text-sm px-2 sm:px-4">
                     Sign In
                   </Button>
                 </Link>
-                <Link to="/auth">
-                  <Button size="sm" className="bg-gray-900 hover:bg-gray-800 text-white">
+                <Link to="/auth" className="hidden sm:block">
+                  <Button size="sm" className="bg-gray-900 hover:bg-gray-800 text-white text-xs sm:text-sm px-2 sm:px-4">
                     Start Campaign
                   </Button>
                 </Link>

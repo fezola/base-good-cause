@@ -51,12 +51,12 @@ export function CompactCampaignCard({ campaign }: CompactCampaignCardProps) {
     <Link to={`/campaign/${campaign.id}`}>
       <div className="card-interactive bg-white border border-card-border rounded-xl overflow-hidden">
         {/* Campaign Image Placeholder */}
-        <div className="relative h-48 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-          <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
-            <Heart className="w-8 h-8 text-primary" />
+        <div className="relative h-40 sm:h-48 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/20 rounded-full flex items-center justify-center">
+            <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
           </div>
           {/* Category Badge */}
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
             <Badge
               variant="secondary"
               className={`${getCategoryColor(campaign.category)} text-xs font-medium border`}
@@ -65,7 +65,7 @@ export function CompactCampaignCard({ campaign }: CompactCampaignCardProps) {
             </Badge>
           </div>
           {/* Time Badge */}
-          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+          <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
             <Clock className="w-3 h-3 text-muted-foreground" />
             <span className="text-xs text-muted-foreground font-medium">
               {daysAgo === 0 ? 'Today' : `${daysAgo}d ago`}
@@ -74,14 +74,14 @@ export function CompactCampaignCard({ campaign }: CompactCampaignCardProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Title */}
-          <h3 className="font-semibold text-foreground text-lg mb-2 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+          <h3 className="font-semibold text-foreground text-base sm:text-lg mb-2 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
             {campaign.title}
           </h3>
 
           {/* Description */}
-          <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed">
+          <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 leading-relaxed">
             {campaign.description}
           </p>
 
