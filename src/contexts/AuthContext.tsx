@@ -60,16 +60,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
         },
-      },
-    })
-    return { error }
+      })
+
+      if (error) {
+        console.error('Supabase signup error:', error)
+      }
+
+      return { error }
+    } catch (err) {
+      console.error('Signup request failed:', err)
+      return { error: err }
+    }
   }
 
   const signOut = async () => {

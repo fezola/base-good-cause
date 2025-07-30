@@ -1,7 +1,6 @@
-// ContributeButton - Proper Base Pay Integration
+// ContributeButton - Official Base Pay Integration
 import { useState } from 'react';
-import { createBaseAccountSDK, getPaymentStatus } from '@base-org/account';
-import { BasePayButton } from '@base-org/account-ui/react';
+import { RealBasePayButton } from '@/components/RealBasePayButton';
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { BASE_PAY_CONFIG } from "@/config/basePay";
-import { BasicPayButton } from "@/components/BasicPayButton";
 
 interface PaymentResult {
   success: boolean;
@@ -38,11 +36,7 @@ export function ContributeButton({
   const [customAmount, setCustomAmount] = useState<string>('');
   const [status, setStatus] = useState('');
 
-  // Initialize Base Account SDK
-  const sdk = createBaseAccountSDK({
-    appName: 'FundMe',
-    appLogo: '/basepay.JPG',
-  });
+  // No SDK initialization needed - handled by WorkingBasePayButton
 
   const getCurrentAmount = (): number => {
     const parsed = parseFloat(customAmount);
@@ -143,12 +137,24 @@ export function ContributeButton({
           )}
         </div>
 
-        {/* Basic Pay Button - Direct pay() call */}
-        <BasicPayButton
+        {/* Debug Test Button */}
+        <Button
+          onClick={() => {
+            console.log('🧪 DEBUG: Test button clicked!');
+            alert('Debug test button works!');
+          }}
+          className="w-full mb-4 bg-purple-600 hover:bg-purple-700"
+        >
+          🧪 DEBUG: Click Test
+        </Button>
+
+        {/* Real Base Pay Button */}
+        <RealBasePayButton
           amount={getCurrentAmount().toFixed(2)}
           recipientAddress={recipientAddress}
           onSuccess={async (result) => {
             console.log('✅ Payment Success:', result);
+            setStatus('🎉 Payment successful!');
 
             toast({
               title: "🎉 Payment Successful!",
@@ -168,7 +174,8 @@ export function ContributeButton({
             await onContribute(paymentResult);
           }}
           onError={async (error) => {
-            console.error('❌ Payment Error:', error);
+            console.error('❌ Payment Failed:', error);
+            setStatus('Payment failed: ' + error.message);
 
             toast({
               title: "❌ Payment Failed",
@@ -185,6 +192,13 @@ export function ContributeButton({
             await onContribute(paymentResult);
           }}
         />
+
+        {/* Status Display */}
+        {status && (
+          <p className="text-sm text-center font-medium mt-4">
+            {status}
+          </p>
+        )}
 
         {/* Security Note */}
         <p className="text-xs text-muted-foreground text-center">

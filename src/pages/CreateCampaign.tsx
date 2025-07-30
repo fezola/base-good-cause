@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { campaignService } from '@/services/campaignService';
+import { contractService } from '@/services/contractService';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -263,17 +264,24 @@ export function CreateCampaign() {
         return;
       }
 
-      // Step 1: Create campaign on smart contract first
-      const goalInEth = formData.goal / 3000; // Convert from USD to ETH (rough conversion: $3000 = 1 ETH)
+      // Step 1: Create campaign on smart contract first (optional)
+      let contractCampaignId: number | undefined;
+      try {
+        const goalInEth = formData.goal / 3000; // Convert from USD to ETH (rough conversion: $3000 = 1 ETH)
 
-      const contractResult = await contractService.createCampaign(
-        formData.title,
-        formData.description,
-        goalInEth,
-        formData.duration
-      );
+        const contractResult = await contractService.createCampaign(
+          formData.title,
+          formData.description,
+          goalInEth,
+          formData.duration
+        );
+        contractCampaignId = contractResult.campaignId;
+      } catch (contractError) {
+        console.warn('Smart contract creation failed, continuing with Supabase only:', contractError);
+        // Continue without contract - campaign will still be created in Supabase
+      }
 
-      // Step 2: Create campaign in Supabase with contract ID
+      // Step 2: Create campaign in Supabase with optional contract ID
       const campaignData = {
         title: formData.title,
         description: formData.description,
@@ -287,7 +295,7 @@ export function CreateCampaign() {
         user_id: user.id,
         status: 'active' as const,
         duration: formData.duration,
-        contract_campaign_id: contractResult.campaignId // Link to smart contract
+        contract_campaign_id: contractCampaignId // Link to smart contract (if created)
       };
 
       const campaign = await campaignService.createCampaign(campaignData);

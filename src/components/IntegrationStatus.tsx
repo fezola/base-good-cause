@@ -124,8 +124,10 @@ export function IntegrationStatus() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Recipient:</span>
                 <span className="font-mono text-xs">
-                  {BASE_PAY_CONFIG.RECIPIENT_ADDRESS.substring(0, 6)}...
-                  {BASE_PAY_CONFIG.RECIPIENT_ADDRESS.substring(-4)}
+                  {BASE_PAY_CONFIG.RECIPIENT_ADDRESS ?
+                    `${BASE_PAY_CONFIG.RECIPIENT_ADDRESS.substring(0, 6)}...${BASE_PAY_CONFIG.RECIPIENT_ADDRESS.slice(-4)}` :
+                    'Not configured'
+                  }
                 </span>
               </div>
               <div className="flex justify-between">

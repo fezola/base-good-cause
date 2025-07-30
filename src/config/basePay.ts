@@ -22,7 +22,12 @@ export const BASE_PAY_CONFIG = {
     LOCATION: 'Lagos, Nigeria',
     BENEFICIARIES: 10
   },
-  
+
+  // Payment Configuration
+  CONTRIBUTION_AMOUNT: import.meta.env.VITE_CONTRIBUTION_AMOUNT || '5',
+  RECIPIENT_ADDRESS: import.meta.env.VITE_RECIPIENT_ADDRESS || '0x742d35Cc6634C0532925a3b8D4C9db96C4b5Da5e',
+  TESTNET: import.meta.env.VITE_TESTNET === 'true',
+
   // Base Chain Configuration
   CHAIN: {
     MAINNET: {
